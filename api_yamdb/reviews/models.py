@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from pytils.translit import slugify
 
 
 class AbstractNameSlugBaseModel(models.Model):
@@ -19,6 +20,7 @@ class AbstractNameSlugBaseModel(models.Model):
     slug = models.SlugField(
         max_length=settings.SLUG_FIELD_MAX_LENGTH,
         unique=True,
+        editable=True,
         verbose_name=_('slug'),
     )
 
@@ -27,6 +29,11 @@ class AbstractNameSlugBaseModel(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)[:settings.SLUG_FIELD_MAX_LENGTH]
+        super().save(*args, **kwargs)
 
 
 class Category(AbstractNameSlugBaseModel):
@@ -43,25 +50,6 @@ class Genre(AbstractNameSlugBaseModel):
     class Meta(AbstractNameSlugBaseModel.Meta):
         verbose_name = _('Жанр')
         verbose_name_plural = _('Жанры')
-
-
-class GenreTitle(models.Model):
-    """Таблица связей Genre и Title."""
-
-    genre = models.ForeignKey(
-        Genre,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=False,
-        verbose_name=_('Жанр'),
-    )
-    title = models.ForeignKey(
-        'Title',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=False,
-        verbose_name=_('Произведение')
-    )
 
 
 class Title(models.Model):
@@ -82,20 +70,10 @@ class Title(models.Model):
         _('Описание'),
         blank=True,
     )
-    rating = models.IntegerField(
-        _('Рейтинг'),
-        blank=True,
-        null=True,
-        validators=[
-            MinValueValidator(settings.MIN_RATING),
-            MaxValueValidator(settings.MAX_RATING),
-        ]
-    )
     genre = models.ManyToManyField(
         Genre,
         related_name='titles',
         verbose_name=_('Жанр'),
-        through=GenreTitle
     )
     category = models.ForeignKey(
         Category,
