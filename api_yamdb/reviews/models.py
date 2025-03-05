@@ -100,7 +100,7 @@ class Title(models.Model):
 class Review(models.Model):
     """Модель отзыва."""
 
-    class Meta(AbstractNameSlugBaseModel.Meta):
+    class Meta:
         verbose_name = _('Отзыв')
         verbose_name_plural = _('Отзывы')
 
