@@ -1,9 +1,13 @@
 """Модели приложения reviews."""
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils.text import Truncator, slugify
 from django.utils.translation import gettext_lazy as _
-from pytils.translit import slugify
+
+# Пока на базовой
+User = get_user_model()
 
 
 class AbstractNameSlugBaseModel(models.Model):
@@ -91,3 +95,47 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Review(models.Model):
+    """Модель отзыва."""
+
+    class Meta(AbstractNameSlugBaseModel.Meta):
+        verbose_name = _('Отзыв')
+        verbose_name_plural = _('Отзывы')
+
+
+class Comment(models.Model):
+    """Модель комментария."""
+
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE
+    )
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE
+    )
+    text = models.TextField(
+        _('Текст комментария'),
+        max_length=settings.CHARFIELD_MAX_LENGTH,
+    )
+    pub_date = models.DateTimeField(
+        _('Дата добавления'),
+        auto_now_add=True,
+        db_index=True
+    )
+
+    class Meta:
+        default_related_name = 'comments'
+
+    def __str__(self):
+        desc = (
+            f'Автор: {self.author}, произведение: {self.title}, ',
+            f'Комментарий: {self.text}'
+        )
+        return Truncator(desc).words(settings.NAME_FIELD_TRUNCATOR)
