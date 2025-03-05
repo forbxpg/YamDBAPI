@@ -2,7 +2,6 @@
 from datetime import datetime as dt
 from pathlib import Path
 
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'p&l%385148kslhtyn^##a1)ilz@4zqj=rq&agdol^##zgl9(vs'
@@ -97,6 +96,7 @@ STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 # Field length limitations
 CHARFIELD_MAX_LENGTH = 256
 SLUG_FIELD_MAX_LENGTH = 50
+NAME_FIELD_TRUNCATOR = 10
 
 # Rating validation
 MIN_RATING = 0
