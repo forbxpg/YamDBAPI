@@ -3,7 +3,7 @@ from rest_framework import viewsets
 
 from api.permissions import CommentPermission
 from api.serializers import CommentSerializer
-from reviews.models import Review, Title
+from reviews.models import Review
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -14,15 +14,10 @@ class CommentViewSet(viewsets.ModelViewSet):
         """Получает объект отзыва из url."""
         return get_object_or_404(Review, pk=self.kwargs['review_id'])
 
-    def title_obj(self):
-        """Получает объект отзыва из url."""
-        return get_object_or_404(Title, pk=self.kwargs['title_id'])
-
     def perform_create(self, serializer):
         serializer.save(
             author=self.request.user,
             review=self.review_obj(),
-            title=self.title_obj(),
         )
 
     def get_queryset(self):
