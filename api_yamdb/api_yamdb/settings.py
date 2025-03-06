@@ -20,6 +20,7 @@ INSTALLED_APPS = [
 
     # 3rd party packages
     'rest_framework',
+    'django_filters',
 
     # Project apps
     'api.apps.ApiConfig',
@@ -105,3 +106,7 @@ MAX_RATING = 10
 # Year validation
 MIN_YEAR = 0
 MAX_YEAR = dt.now().year
+
+# Pagination
+DEFAULT_PAGE_SIZE = 10
+MAX_PAGE_SIZE = 20
