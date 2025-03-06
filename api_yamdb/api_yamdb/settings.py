@@ -25,6 +25,9 @@ INSTALLED_APPS = [
     # Project apps
     'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
+
+    # Users
+    'users.apps.UsersConfig'
 ]
 
 MIDDLEWARE = [
@@ -64,6 +67,8 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+AUTH_USER_MODEL = 'users.User'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
