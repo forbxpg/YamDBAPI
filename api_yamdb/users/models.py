@@ -7,7 +7,7 @@ from .validators import CustomUsernameValidator
 
 class CustomUserManager(BaseUserManager):
 
-    def _create_user(self, username, email, password=None, **extra_fields):
+    def create_user(self, username, email, password=None, **extra_fields):
         if not email:
             raise ValueError('Users must have an email address')
         if not username:
@@ -33,7 +33,7 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
-        return self._create_user(username, email, password, **extra_fields)
+        return self.create_user(username, email, password, **extra_fields)
 
 
 class User(AbstractUser):
