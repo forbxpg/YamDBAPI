@@ -1,58 +1,62 @@
 """Дополнительные команды для заполнения БД данными из csv."""
-import csv
 
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.db import transaction
 
-from reviews.models import (
-    Category, Genre, Title, Review, Comment
+from reviews.models import Genre, Title
+from .services import (
+    fill_many_to_many_tables,
+    fill_simple_and_foreign_key_tables,
 )
-from api_yamdb.settings import CSV_DATA_PATH
-from .csv_config import CSV_MAPPING
+
+from .csv_config import CSV_MAPPING, M2M_MODELS_MAPPING
 from .exceptions import CommandException
 
 
 User = get_user_model()
 
 
-MODEL_CONFIG = {
-    'category': (Category, CSV_DATA_PATH / 'category.csv'),
-    'genre': (Genre, CSV_DATA_PATH / 'genre.csv'),
-    'titles': (Title, CSV_DATA_PATH / 'titles.csv'),
-    'review': (Review, CSV_DATA_PATH / 'review.csv'),
-    'comments': (Comment, CSV_DATA_PATH / 'comments.csv'),
-    'genre_title': (None, CSV_DATA_PATH / 'genre_title.csv'),
-    'users': (User, CSV_DATA_PATH / 'users.csv'),
-}
-
-
 class Command(BaseCommand):
     """
-    Кастомная команда для заполнения БД данными из csv.
+    **Кастомная команда для заполнения БД данными из csv-файлов.**
 
-    Пример использования:
-        python(3) manage.py db_fill --category - заполнение Category.
-        python(3) manage.py db_fill --all - заполнение всех таблиц.
+    **Пример использования**:
+    - `python(3) manage.py db_fill --category` - заполнение таблицы category.
+    - `python(3) manage.py db_fill --all` - заполнение всех таблиц.
+
+    **Ограничения**:
+        **Заполнение должно происходить в строго-определенном порядке:**
+        1) ***Если понадобится заполнить таблицу, в которой FK поле,
+        то необходимо сначала заполнить таблицу, на которую ссылается поле.***
+        **e.g**:
+            - `python(3) manage.py db_fill --category`
+            - `python(3) manage.py db_fill --title`
+        2) ***Если понадобится заполнить таблицу, где поле имеет связь M2M,
+        то необходимо сначала заполнить таблицу, которая имеет M2M поле,
+        затем связанную.***
+        **e.g**: (предполагается, что таблица category заполнена)
+            - `python(3) manage.py db_fill --title`
+            - `python(3) manage.py db_fill --genre_title`
     """
 
-    help = 'Команда, заполняющая БД данными из csv.'
+    help = 'Команда для заполнения таблиц в базе данных.'
 
     def add_arguments(self, parser):
-        """Добавление аргументов для ввода в командной строке."""
+        """Добавляет аргументы, используемые в команде."""
 
-        for db_table in CSV_MAPPING:
-            if db_table != 'genre_title':
-                parser.add_argument(
-                    f'--{db_table}',
-                    action='store_true',
-                    help=f'Заполнение таблицы {db_table}',
-                )
-        parser.add_argument(
-            '--genre_title',
-            action='store_true',
-            help='Заполнение ManyToMany связанных таблиц Genre, Title',
-        )
+        for table in CSV_MAPPING:
+            parser.add_argument(
+                f'--{table}',
+                action='store_true',
+                help=f'Заполнение таблицы {table}',
+            )
+        for m2m_table in M2M_MODELS_MAPPING:
+            parser.add_argument(
+                f'--{m2m_table}',
+                action='store_true',
+                help=f'Заполнение таблицы {m2m_table}',
+            )
         parser.add_argument(
             '--all',
             action='store_true',
@@ -61,89 +65,54 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """
-        Вся логика реализации заполнения.
+        Реализует заполнение базы данных.
 
-        Работа по принципу ACID.
-        Данные либо все заполнятся, либо нет.
+        Реализует принцип атомарности транзакций.
+        База данных не будет заполнена, если в csv имеются ошибки.
         """
+
         try:
             with transaction.atomic():
                 if options.get('all', False):
-                    self.fill_all_tables()
+                    self.fill_all_tables(CSV_MAPPING, M2M_MODELS_MAPPING)
                 else:
-                    self.fill_selected_tables(options)
+                    self.fill_selected_tables(
+                        options, CSV_MAPPING, M2M_MODELS_MAPPING
+                    )
             self.stdout.write(self.style.SUCCESS('Данные успешно заполнены!'))
-
-        except Exception as e:
+        except CommandException as e:
             self.stdout.write(self.style.ERROR(f'Ошибка {e}'))
 
-    def fill_all_tables(self):
-        for db_table in CSV_MAPPING:
-            if db_table != 'genre_title':
-                self.fill_tables(db_table)
-            else:
-                self.fill_genre_title()
+    def fill_all_tables(
+        self,
+        simple_model_mapping: dict,
+        m2m_model_mapping: dict,
+    ) -> None:
+        """Заполняет все таблицы."""
+        for table in simple_model_mapping:
+            fill_simple_and_foreign_key_tables(simple_model_mapping, table)
 
-    def fill_selected_tables(self, options):
-        fill_order = [
-            'users',
-            'category',
-            'genre',
-            'titles',
-            'review',
-            'comments',
-            'genre_title',
-        ]
-        for db_table in fill_order:
-            if options.get(db_table, False):
-                if db_table != 'genre_title':
-                    self.fill_tables(db_table)
-                else:
-                    self.fill_genre_title()
+        for m2m_table in m2m_model_mapping:
+            fill_many_to_many_tables(m2m_model_mapping, m2m_table)
 
-    def fill_tables(self, table_name):
-        table = CSV_MAPPING.get(table_name)
-        if not table:
-            raise CommandException(f'Конфигурация для {table} не найдена')
-        model = table.get('model')
-        fields_map = table.get('fields')
+    def fill_selected_tables(
+        self, options: dict,
+        simple_model_mapping: dict = None,
+        m2m_model_mapping: dict = None
+    ) -> None:
+        """Заполняет выбранные таблицы."""
 
-        with open(table.get('path'), 'r', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
+        if simple_model_mapping is None:
+            simple_model_mapping = CSV_MAPPING
 
-            for line in reader:
-                self.process_lines(model, fields_map, line)
-            self.stdout.write('Таблицы заполнены!')
+        if m2m_model_mapping is None:
+            m2m_model_mapping = M2M_MODELS_MAPPING
 
-    def process_lines(self, model, fields_dict, line):
-
-        model_fields = {}
-
-        for field_key, field_value in fields_dict.items():
-            if isinstance(field_value, tuple):
-                relation_id, related_model_name = field_value
-                model_fields[field_key] = related_model_name.objects.get(
-                    id=line.get(relation_id)
+        for table in simple_model_mapping:
+            if options.get(table, False):
+                fill_simple_and_foreign_key_tables(simple_model_mapping, table)
+        for m2m_table in m2m_model_mapping:
+            if options.get(m2m_table, False):
+                fill_many_to_many_tables(
+                    m2m_model_mapping, m2m_table
                 )
-            else:
-                model_fields[field_key] = line[field_value]
-
-        try:
-            model.objects.get_or_create(**model_fields)
-        except Exception as e:
-            self.stdout.write(
-                self.style.WARNING(
-                    f'Пропущена запись {model_fields}, ошибка {e}'
-                )
-            )
-
-    def fill_genre_title(self):
-        path = CSV_MAPPING['genre_title']['path']
-        with open(path, 'r', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
-
-            for line in reader:
-                title = Title.objects.get(id=line['title_id'])
-                genre = Genre.objects.get(id=line['genre_id'])
-                title.genre.add(genre)
-        self.stdout.write('Таблица ManyToMany заполнена')
