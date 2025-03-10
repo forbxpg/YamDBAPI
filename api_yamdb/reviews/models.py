@@ -1,9 +1,13 @@
 """Модели приложения reviews."""
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils.text import Truncator, slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
+from users.models import User
+
 
 
 class AbstractNameSlugBaseModel(models.Model):
@@ -91,3 +95,88 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class AbstractTextAuthorPubdateModel(models.Model):
+    """
+    Класс, определяющий абстрактную модель.
+
+    Используется для создания моделей, имеющих поля text, author и pub_date.
+    """
+    text = models.TextField(
+        _('Текст'),
+        max_length=settings.CHARFIELD_MAX_LENGTH,
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name=_('Автор')
+    )
+    pub_date = models.DateTimeField(
+        _('Дата добавления'),
+        auto_now_add=True,
+        db_index=True
+    )
+
+    class Meta:
+        abstract = True
+        ordering = ('-pub_date',)
+
+
+class Review(AbstractTextAuthorPubdateModel):
+    """Модель отзыва."""
+
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name=_('Произведение'),
+    )
+
+    score = models.SmallIntegerField(
+        _('Оценка'),
+        validators=[
+            MinValueValidator(
+                settings.MIN_RATING, 'Оценка должна быть от 1 до 10'),
+            MaxValueValidator(
+                settings.MAX_RATING, 'Оценка должна быть от 1 до 10'),
+        ]
+    )
+
+    class Meta(AbstractTextAuthorPubdateModel.Meta):
+        default_related_name = 'reviews'
+        verbose_name = _('Отзыв')
+        verbose_name_plural = _('Отзывы')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'],
+                name='unique_author_title'
+            )
+        ]
+
+    def __str__(self):
+        desc = (
+            f'Автор: {self.author}, произведение: {self.title}, ',
+            f'оценка: {self.score}, отзыв: {self.text}'
+        )
+        return Truncator(desc).words(settings.NAME_FIELD_TRUNCATOR)
+
+
+class Comment(AbstractTextAuthorPubdateModel):
+    """Модель комментария."""
+
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE
+    )
+
+    class Meta(AbstractTextAuthorPubdateModel.Meta):
+        default_related_name = 'comments'
+        verbose_name = _('Комментарий')
+        verbose_name_plural = _('Комментарии')
+
+    def __str__(self):
+        desc = (
+            f'Автор: {self.author}, произведение: {self.title}, ',
+            f'Комментарий: {self.text}'
+        )
+        return Truncator(desc).words(settings.NAME_FIELD_TRUNCATOR)

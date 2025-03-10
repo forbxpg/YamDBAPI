@@ -7,6 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'p&l%385148kslhtyn^##a1)ilz@4zqj=rq&agdol^##zgl9(vs'
 
+
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
@@ -21,6 +22,7 @@ INSTALLED_APPS = [
 
     # 3rd party packages
     'rest_framework',
+    'django_filters',
 
     # Project apps
     'api.apps.ApiConfig',
@@ -102,6 +104,7 @@ STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 # Field length limitations
 CHARFIELD_MAX_LENGTH = 256
 SLUG_FIELD_MAX_LENGTH = 50
+NAME_FIELD_TRUNCATOR = 10
 
 # Rating validation
 MIN_RATING = 0
@@ -111,6 +114,34 @@ MAX_RATING = 10
 MIN_YEAR = 0
 MAX_YEAR = dt.now().year
 
+# CSV data settings
+CSV_DATA_PATH = STATICFILES_DIRS[0] / 'data/'
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '[{levelname}] | {module} |  [{funcName}] | {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'import': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
 # users rols
 ROLE_CHOICES = (
     ('user', 'user'),
@@ -122,4 +153,7 @@ USERS_ROLE = {
     'user': ROLE_CHOICES[0][0],
     'moderator': ROLE_CHOICES[1][0],
     'admin': ROLE_CHOICES[2][0]
-}
+
+# Pagination
+DEFAULT_PAGE_SIZE = 10
+MAX_PAGE_SIZE = 20
