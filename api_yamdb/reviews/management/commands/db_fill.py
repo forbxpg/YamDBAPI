@@ -1,17 +1,19 @@
 """Дополнительные команды для заполнения БД данными из csv."""
+import logging
+from typing import Dict
 
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.db import transaction
 
-from reviews.models import Genre, Title
-from .services import (
+from ..services import (
     fill_many_to_many_tables,
     fill_simple_and_foreign_key_tables,
 )
+from ..csv_config import CSV_MAPPING, M2M_MODELS_MAPPING
 
-from .csv_config import CSV_MAPPING, M2M_MODELS_MAPPING
-from .exceptions import CommandException
+
+logger = logging.getLogger('import')
 
 
 User = get_user_model()
@@ -70,25 +72,31 @@ class Command(BaseCommand):
         Реализует принцип атомарности транзакций.
         База данных не будет заполнена, если в csv имеются ошибки.
         """
-
+        logger.info('Заполнение базы данных...')
         try:
             with transaction.atomic():
                 if options.get('all', False):
-                    self.fill_all_tables(CSV_MAPPING, M2M_MODELS_MAPPING)
+                    self.fill_all_tables(
+                        CSV_MAPPING, M2M_MODELS_MAPPING,
+                    )
                 else:
                     self.fill_selected_tables(
-                        options, CSV_MAPPING, M2M_MODELS_MAPPING
+                        options, CSV_MAPPING, M2M_MODELS_MAPPING,
                     )
             self.stdout.write(self.style.SUCCESS('Данные успешно заполнены!'))
-        except CommandException as e:
-            self.stdout.write(self.style.ERROR(f'Ошибка {e}'))
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f'Ошибка при заполнении: {e}'))
 
     def fill_all_tables(
         self,
-        simple_model_mapping: dict,
-        m2m_model_mapping: dict,
+        simple_model_mapping: Dict,
+        m2m_model_mapping: Dict,
     ) -> None:
-        """Заполняет все таблицы."""
+        """
+        Заполняет все таблицы, переданные в команде:
+
+        `python(3) manage.py db_fill --all`
+        """
         for table in simple_model_mapping:
             fill_simple_and_foreign_key_tables(simple_model_mapping, table)
 
@@ -96,21 +104,16 @@ class Command(BaseCommand):
             fill_many_to_many_tables(m2m_model_mapping, m2m_table)
 
     def fill_selected_tables(
-        self, options: dict,
-        simple_model_mapping: dict = None,
-        m2m_model_mapping: dict = None
+        self, options: Dict,
+        simple_model_mapping: Dict,
+        m2m_model_mapping: dict,
     ) -> None:
-        """Заполняет выбранные таблицы."""
-
-        if simple_model_mapping is None:
-            simple_model_mapping = CSV_MAPPING
-
-        if m2m_model_mapping is None:
-            m2m_model_mapping = M2M_MODELS_MAPPING
+        """Заполняет выбранные таблицы в команде."""
 
         for table in simple_model_mapping:
             if options.get(table, False):
                 fill_simple_and_foreign_key_tables(simple_model_mapping, table)
+
         for m2m_table in m2m_model_mapping:
             if options.get(m2m_table, False):
                 fill_many_to_many_tables(

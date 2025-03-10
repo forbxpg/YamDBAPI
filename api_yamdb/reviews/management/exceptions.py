@@ -1,10 +1,6 @@
 """Базовые исключения для команд."""
 
 
-class CommandException(Exception):
-    """Базовое исключение для команд."""
-
-
 class FileDoesNotExist(Exception):
     """Исключение для несуществующего файла."""
 

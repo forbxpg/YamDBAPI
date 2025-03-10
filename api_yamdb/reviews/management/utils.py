@@ -1,6 +1,8 @@
+"""Утилиты для работы с маппингом таблиц."""
+
+from typing import Dict
 
 from django.db.models import Model
-
 from .exceptions import MappingError
 
 
@@ -10,11 +12,11 @@ class Data():
     """
 
     def __init__(self, mapping: dict, table_name: str) -> None:
-        self.mapping = mapping
-        self.table_name = table_name
+        self.mapping: Dict = mapping
+        self.table_name: str = table_name
         self._validate_table()
-        self.path = self.get_path()
-        self.fields = self.get_fields()
+        self.path: str = self.get_path()
+        self.fields: Dict = self.get_fields()
 
     def _validate_table(self) -> None:
         if self.table_name not in self.mapping:
