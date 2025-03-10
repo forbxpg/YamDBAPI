@@ -117,7 +117,11 @@ MAX_YEAR = dt.now().year
 # CSV data settings
 CSV_DATA_PATH = STATICFILES_DIRS[0] / 'data/'
 
+# Pagination
+DEFAULT_PAGE_SIZE = 10
+MAX_PAGE_SIZE = 20
 
+# Command logs
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -142,7 +146,8 @@ LOGGING = {
         },
     },
 }
-# users rols
+
+# users roles
 ROLE_CHOICES = (
     ('user', 'user'),
     ('moderator', 'moderator'),
@@ -153,7 +158,5 @@ USERS_ROLE = {
     'user': ROLE_CHOICES[0][0],
     'moderator': ROLE_CHOICES[1][0],
     'admin': ROLE_CHOICES[2][0]
+}
 
-# Pagination
-DEFAULT_PAGE_SIZE = 10
-MAX_PAGE_SIZE = 20
