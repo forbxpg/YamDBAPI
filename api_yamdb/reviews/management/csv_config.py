@@ -1,14 +1,11 @@
 """Настройки для импорта данных из CSV-файлов."""
-from django.contrib.auth import get_user_model
 
 from reviews.models import Review, Title, Category, Genre, Comment
 from api_yamdb.settings import CSV_DATA_PATH
+from users.models import User
 
 
-User = get_user_model()
-
-
-BULK_CREATE_BATCH_SIZE = 150
+BULK_CREATE_BATCH_SIZE = 300
 
 
 CSV_MAPPING = {
@@ -56,10 +53,9 @@ CSV_MAPPING = {
     'review': {
         'model': Review,
         'fields': {
-            'id': 'id',
-            'title_id': ('title_id', Title),
-            'text': 'text',
             'author': ('author', User),
+            'title': ('title_id', Title),
+            'text': 'text',
             'score': 'score',
             'pub_date': 'pub_date',
         },
@@ -70,7 +66,7 @@ CSV_MAPPING = {
         'fields': {
             'id': 'id',
             'author': ('author', User),
-            'review_id': ('review_id', Review),
+            'review': ('review_id', Review),
             'pub_date': 'pub_date',
             'text': 'text',
         },
