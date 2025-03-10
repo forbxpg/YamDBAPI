@@ -110,3 +110,16 @@ MAX_RATING = 10
 # Year validation
 MIN_YEAR = 0
 MAX_YEAR = dt.now().year
+
+# users rols
+ROLE_CHOICES = (
+    ('user', 'user'),
+    ('moderator', 'moderator'),
+    ('admin', 'admin'),
+)
+
+USERS_ROLE = {
+    'user': ROLE_CHOICES[0][0],
+    'moderator': ROLE_CHOICES[1][0],
+    'admin': ROLE_CHOICES[2][0]
+}

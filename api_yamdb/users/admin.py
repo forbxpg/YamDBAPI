@@ -9,6 +9,7 @@ User = get_user_model()
 
 
 class CustomUserAdmin(UserAdmin):
+    """Кастомный UserAdmin."""
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = User
@@ -22,6 +23,7 @@ class CustomUserAdmin(UserAdmin):
         'username',
         'email',
         'role',
+        'is_superuser',
         'is_active',
         'date_joined',
         'last_login',
@@ -32,8 +34,6 @@ class CustomUserAdmin(UserAdmin):
 
 
 CustomUserAdmin.fieldsets += (
-    # Добавляем кортеж, где первый элемент — это название раздела в админке,
-    # а второй элемент — словарь, где под ключом fields можно указать нужные поля.
     ('Биография', {'fields': ('bio',)}),
     ('Роль', {'fields': ('role',)}),
 )

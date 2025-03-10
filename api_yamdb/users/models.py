@@ -1,42 +1,14 @@
 """Модели приложения users."""
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from api_yamdb.settings import ROLE_CHOICES, USERS_ROLE
+from .manager import CustomUserManager
 from .validators import CustomUsernameValidator
 
 
-class CustomUserManager(BaseUserManager):
-
-    def create_user(self, username, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError('Users must have an email address')
-        if not username:
-            raise ValueError('Users must have a username')
-
-        user = self.model(
-            username=username,
-            email=self.normalize_email(email).lower(),
-            **extra_fields
-        )
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, username, email=None, password=None,
-                         **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_active', True)
-        extra_fields.setdefault('is_superuser', True)
-
-        if extra_fields.get('is_staff') is not True:
-            raise ValueError('Superuser must have is_staff=True.')
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must have is_superuser=True.')
-
-        return self.create_user(username, email, password, **extra_fields)
-
-
 class User(AbstractUser):
+    """Кастомный User."""
     username_validator = CustomUsernameValidator
 
     username = models.CharField(
@@ -47,7 +19,7 @@ class User(AbstractUser):
     email = models.EmailField(
         max_length=254,
         unique=True,
-        verbose_name='Адрес электронной почты:'
+        verbose_name='Адрес электронной почты'
     )
 
     bio = models.TextField(
@@ -56,22 +28,25 @@ class User(AbstractUser):
         verbose_name='Биография'
     )
 
-    ROLE_CHOICES = (
-        ('user', 'user'),
-        ('moderator', 'moderator'),
-        ('admin', 'admin'),
-    )
-
     role = models.CharField(
         max_length=9,
         choices=ROLE_CHOICES,
-        default=ROLE_CHOICES[0][0],
-        verbose_name='роль'
+        default=USERS_ROLE['user'],
+        verbose_name='Роль'
     )
 
     REQUIRED_FIELDS = ['email']
     objects = CustomUserManager()
 
     class Meta:
+        """Meta."""
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+
+    @property
+    def superuser_is(self):
+        return self.is_superuser
+
+    @property
+    def role_is(self):
+        return self.role
