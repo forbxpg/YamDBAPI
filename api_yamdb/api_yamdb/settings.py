@@ -2,9 +2,11 @@
 from datetime import datetime as dt
 from pathlib import Path
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'p&l%385148kslhtyn^##a1)ilz@4zqj=rq&agdol^##zgl9(vs'
+
 
 DEBUG = True
 
@@ -110,3 +112,32 @@ MAX_YEAR = dt.now().year
 # Pagination
 DEFAULT_PAGE_SIZE = 10
 MAX_PAGE_SIZE = 20
+
+# CSV data settings
+CSV_DATA_PATH = STATICFILES_DIRS[0] / 'data/'
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '[{levelname}] | {module} |  [{funcName}] | {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'import': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
