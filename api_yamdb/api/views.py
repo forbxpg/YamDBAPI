@@ -9,11 +9,11 @@ from reviews.models import (
 )
 from .mixins import CreateListDestroyViewSet
 from .pagination import BaseLimitOffsetPagination
-from .permissions import CommentPermission
+from .permissions import CommentReviewPermission
 from .serializers import (
     CommentSerializer, TitleReadSerializer,
     TitleWriteSerializer, CategorySerializer,
-    GenreSerializer
+    GenreSerializer, ReviewSerializer
 )
 
 
@@ -74,14 +74,15 @@ class CommentViewSet(viewsets.ModelViewSet):
     """ViewSet для модели Comment."""
 
     serializer_class = CommentSerializer
-    permission_classes = (CommentPermission,)
+    permission_classes = (CommentReviewPermission,)
+    pagination_class = BaseLimitOffsetPagination
 
     def review_obj(self):
         """Получает объект отзыва из url."""
         return get_object_or_404(Review, pk=self.kwargs['review_id'])
 
     def title_obj(self):
-        """Получает объект отзыва из url."""
+        """Получает объект произведения из url."""
         return get_object_or_404(Title, pk=self.kwargs['title_id'])
 
     def perform_create(self, serializer):
@@ -93,3 +94,24 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.review_obj().comments.all()
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    """ViewSet для модели Review."""
+
+    serializer_class = ReviewSerializer
+    pagination_class = BaseLimitOffsetPagination
+    permission_classes = (CommentReviewPermission,)
+
+    def title_obj(self):
+        """Получает объект произведения из url."""
+        return get_object_or_404(Title, pk=self.kwargs['title_id'])
+
+    def perform_create(self, serializer):
+        serializer.save(
+            author=self.request.user,
+            title=self.title_obj(),
+        )
+
+    def get_queryset(self):
+        return self.title_obj().reviews.all()

@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
-class CommentPermission(BasePermission):
+class CommentReviewPermission(BasePermission):
     """Ограничение для модели Comment.
 
     К запросам PUT, PATCH, DELETE допускается только автор, модератор и админ.

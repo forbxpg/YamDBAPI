@@ -129,6 +129,13 @@ class Review(models.Model):
         default_related_name = 'reviews'
         verbose_name = _('Отзыв')
         verbose_name_plural = _('Отзывы')
+    
+    def __str__(self):
+        desc = (
+            f'Автор: {self.author}, произведение: {self.title}, ',
+            f'оценка: {self.score}, отзыв: {self.text}'
+        )
+        return Truncator(desc).words(settings.NAME_FIELD_TRUNCATOR)
 
 
 class Comment(models.Model):
@@ -158,6 +165,8 @@ class Comment(models.Model):
 
     class Meta:
         default_related_name = 'comments'
+        verbose_name = _('Комментарий')
+        verbose_name_plural = _('Комментарии')
 
     def __str__(self):
         desc = (
