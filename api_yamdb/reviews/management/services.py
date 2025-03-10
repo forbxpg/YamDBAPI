@@ -2,7 +2,7 @@
 
 import csv
 import logging
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from django.db.models import Model
 from django.core.exceptions import ObjectDoesNotExist
@@ -26,11 +26,13 @@ def map_data(fields: Dict, line: Dict) -> Dict:
     mapped_data: Dict = {}
 
     for field, value in fields.items():
-        if isinstance(value, tuple):
+        if not isinstance(value, tuple):
+            mapped_data[field] = line.get(value)
+        else:
             related_field_id, related_model = value
             try:
                 mapped_data[field] = related_model.objects.get(
-                    id=line.get(related_field_id)
+                    id=line[related_field_id]
                 )
             except ObjectDoesNotExist as e:
                 error_msg = (
@@ -39,8 +41,6 @@ def map_data(fields: Dict, line: Dict) -> Dict:
                 )
                 logger.debug(error_msg)
                 raise TableFillError(error_msg) from e
-        else:
-            mapped_data[field] = line.get(value)
     return mapped_data
 
 
