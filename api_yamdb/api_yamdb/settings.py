@@ -21,6 +21,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # 3rd party packages
+    'rest_framework',
+    'django_filters',
+
+    # Project apps
+    'api.apps.ApiConfig',
+    'reviews.apps.ReviewsConfig',
 ]
 
 MIDDLEWARE = [
@@ -101,3 +109,22 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
+
+
+# Constants
+# Field length limitations
+CHARFIELD_MAX_LENGTH = 256
+SLUG_FIELD_MAX_LENGTH = 50
+NAME_FIELD_TRUNCATOR = 10
+
+# Rating validation
+MIN_RATING = 0
+MAX_RATING = 10
+
+# Year validation
+MIN_YEAR = 0
+MAX_YEAR = dt.now().year
+
+# Pagination
+DEFAULT_PAGE_SIZE = 10
+MAX_PAGE_SIZE = 20
