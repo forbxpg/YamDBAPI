@@ -100,7 +100,33 @@ class Title(models.Model):
 class Review(models.Model):
     """Модель отзыва."""
 
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name=_('Произведение'),
+    )
+    text = models.TextField(
+        _('Текст отзыва'),
+    )
+    score = models.IntegerField(
+        _('Оценка'),
+        validators=[
+            MinValueValidator(settings.MIN_RATING),
+            MaxValueValidator(settings.MAX_RATING),
+        ]
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+    pub_date = models.DateTimeField(
+        _('Дата добавления'),
+        auto_now_add=True,
+        db_index=True
+    )
+
     class Meta:
+        default_related_name = 'reviews'
         verbose_name = _('Отзыв')
         verbose_name_plural = _('Отзывы')
 
