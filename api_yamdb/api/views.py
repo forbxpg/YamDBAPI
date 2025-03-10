@@ -1,4 +1,5 @@
 """API Views."""
+from django.db.models import Avg, Count
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
@@ -26,7 +27,8 @@ class TitleViewSet(viewsets.ModelViewSet):
     """
 
     queryset = Title.objects.prefetch_related(
-        'genre').select_related('category')
+        'genre').select_related('category').annotate(
+            average_rating=Avg('reviews__score'))
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = (
         'name', 'genre__slug',

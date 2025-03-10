@@ -1,3 +1,4 @@
+from django.db.models import Avg, Count
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -47,7 +48,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
     def get_rating(self, obj):
         """Возвращает рейтинг произведения."""
-        pass
+        return obj.average_rating
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):

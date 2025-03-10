@@ -108,7 +108,7 @@ class Review(models.Model):
     text = models.TextField(
         _('Текст отзыва'),
     )
-    score = models.IntegerField(
+    score = models.SmallIntegerField(
         _('Оценка'),
         validators=[
             MinValueValidator(settings.MIN_RATING),
