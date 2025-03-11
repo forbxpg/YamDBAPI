@@ -1,6 +1,6 @@
 """Утилиты для работы с маппингом таблиц."""
 
-from typing import Dict
+from typing import Dict, Optional
 
 from django.db.models import Model
 from .exceptions import MappingError
@@ -12,11 +12,11 @@ class Data():
     """
 
     def __init__(self, mapping: dict, table_name: str) -> None:
-        self.mapping: Dict = mapping
+        self.mapping: dict = mapping
         self.table_name: str = table_name
         self._validate_table()
         self.path: str = self.get_path()
-        self.fields: Dict = self.get_fields()
+        self.fields: dict = self.get_fields()
 
     def _validate_table(self) -> None:
         if self.table_name not in self.mapping:
@@ -24,7 +24,7 @@ class Data():
                 f'Таблица {self.table_name} не найдена в маппинге!'
             )
 
-    def _get_mapping_config(self) -> dict:
+    def _get_mapping_config(self) -> Dict:
         return self.mapping.get(self.table_name)
 
     def get_path(self) -> str:
@@ -37,7 +37,7 @@ class Data():
             )
         return path
 
-    def get_fields(self) -> dict:
+    def get_fields(self) -> Dict:
         """Возвращает словарь из полей модели таблицы."""
 
         fields = self._get_mapping_config().get('fields')
@@ -47,7 +47,7 @@ class Data():
             )
         return fields
 
-    def get_simple_model(self) -> Model:
+    def get_simple_model(self):
         """Возвращает модель, ответственную за таблицу."""
 
         model = self._get_mapping_config().get('model')

@@ -27,6 +27,9 @@ INSTALLED_APPS = [
     # Project apps
     'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
+
+    # Users
+    'users.apps.UsersConfig'
 ]
 
 MIDDLEWARE = [
@@ -66,6 +69,8 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+AUTH_USER_MODEL = 'users.User'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -109,14 +114,14 @@ MAX_RATING = 10
 MIN_YEAR = 0
 MAX_YEAR = dt.now().year
 
+# CSV data settings
+CSV_DATA_PATH = STATICFILES_DIRS[0] / 'data/'
+
 # Pagination
 DEFAULT_PAGE_SIZE = 10
 MAX_PAGE_SIZE = 20
 
-# CSV data settings
-CSV_DATA_PATH = STATICFILES_DIRS[0] / 'data/'
-
-
+# Command logs
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -141,3 +146,17 @@ LOGGING = {
         },
     },
 }
+
+# users roles
+ROLE_CHOICES = (
+    ('user', 'user'),
+    ('moderator', 'moderator'),
+    ('admin', 'admin'),
+)
+
+USERS_ROLE = {
+    'user': ROLE_CHOICES[0][0],
+    'moderator': ROLE_CHOICES[1][0],
+    'admin': ROLE_CHOICES[2][0]
+}
+

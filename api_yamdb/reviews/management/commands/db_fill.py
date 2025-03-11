@@ -106,7 +106,7 @@ class Command(BaseCommand):
     def fill_selected_tables(
         self, options: Dict,
         simple_model_mapping: Dict,
-        m2m_model_mapping: dict,
+        m2m_model_mapping: Dict,
     ) -> None:
         """Заполняет выбранные таблицы в команде."""
 
