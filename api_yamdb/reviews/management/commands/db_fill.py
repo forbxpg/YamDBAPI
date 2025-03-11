@@ -2,16 +2,13 @@
 import logging
 from typing import Dict
 
-from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from ..services import (
-    fill_many_to_many_tables,
-    fill_simple_and_foreign_key_tables,
-)
 from ..csv_config import CSV_MAPPING, M2M_MODELS_MAPPING
-
+from ..services import (fill_many_to_many_tables,
+                        fill_simple_and_foreign_key_tables)
 
 logger = logging.getLogger('import')
 

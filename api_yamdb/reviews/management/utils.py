@@ -3,6 +3,7 @@
 from typing import Dict, Optional
 
 from django.db.models import Model
+
 from .exceptions import MappingError
 
 

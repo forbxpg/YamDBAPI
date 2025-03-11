@@ -1,21 +1,17 @@
 """API Views."""
-from django.db.models import Avg, Count
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters
-from rest_framework import viewsets
+from rest_framework import filters, viewsets
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from reviews.models import Category, Genre, Review, Title
 
-from reviews.models import (
-    Review, Title, Category, Genre
-)
 from .mixins import CreateListDestroyViewSet
 from .pagination import BaseLimitOffsetPagination
 from .permissions import CommentReviewPermission
-from .serializers import (
-    CommentSerializer, TitleReadSerializer,
-    TitleWriteSerializer, CategorySerializer,
-    GenreSerializer, ReviewSerializer
-)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer,
+                          TitleReadSerializer, TitleWriteSerializer)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -76,12 +72,14 @@ class CommentViewSet(viewsets.ModelViewSet):
     """ViewSet для модели Comment."""
 
     serializer_class = CommentSerializer
-    permission_classes = (CommentReviewPermission,)
+    permission_classes = (IsAuthenticatedOrReadOnly, CommentReviewPermission)
     pagination_class = BaseLimitOffsetPagination
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def review_obj(self):
         """Получает объект отзыва из url."""
-        return get_object_or_404(Review, pk=self.kwargs['review_id'])
+        review = get_object_or_404(Review, pk=self.kwargs['review_id'])
+        return review
 
     def perform_create(self, serializer):
         serializer.save(
@@ -98,7 +96,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     serializer_class = ReviewSerializer
     pagination_class = BaseLimitOffsetPagination
-    permission_classes = (CommentReviewPermission,)
+    permission_classes = (IsAuthenticatedOrReadOnly, CommentReviewPermission)
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def title_obj(self):
         """Получает объект произведения из url."""
@@ -112,3 +111,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.title_obj().reviews.all()
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['title_id'] = self.kwargs['title_id']
+        return context

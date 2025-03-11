@@ -1,13 +1,10 @@
 """Модели приложения reviews."""
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.text import Truncator, slugify
 from django.utils.translation import gettext_lazy as _
-from django.utils.text import slugify
 from users.models import User
-
 
 
 class AbstractNameSlugBaseModel(models.Model):
@@ -131,14 +128,13 @@ class Review(AbstractTextAuthorPubdateModel):
         on_delete=models.CASCADE,
         verbose_name=_('Произведение'),
     )
-
     score = models.SmallIntegerField(
         _('Оценка'),
         validators=[
             MinValueValidator(
-                settings.MIN_RATING, 'Оценка должна быть от 1 до 10'),
+                settings.MIN_RATING, message='Оценка должна быть от 1 до 10'),
             MaxValueValidator(
-                settings.MAX_RATING, 'Оценка должна быть от 1 до 10'),
+                settings.MAX_RATING, message='Оценка должна быть от 1 до 10'),
         ]
     )
 

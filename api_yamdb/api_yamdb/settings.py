@@ -1,7 +1,7 @@
 """Настройки проекта."""
 from datetime import datetime as dt
+from datetime import timedelta
 from pathlib import Path
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,6 +22,7 @@ INSTALLED_APPS = [
 
     # 3rd party packages
     'rest_framework',
+    'rest_framework_simplejwt',
     'django_filters',
 
     # Project apps
@@ -160,3 +161,12 @@ USERS_ROLE = {
     'admin': ROLE_CHOICES[2][0]
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(weeks=5)
+}

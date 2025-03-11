@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 from api_yamdb.settings import ROLE_CHOICES, USERS_ROLE
+
 from .manager import CustomUserManager
 from .validators import CustomUsernameValidator
 

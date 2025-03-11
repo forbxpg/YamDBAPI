@@ -1,10 +1,5 @@
-from django.db.models import Avg, Count
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
-
-from reviews.models import (
-    Comment, Title, Category, Genre, Review
-)
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -99,6 +94,18 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username',
         default=serializers.CurrentUserDefault()
     )
+
+    def validate(self, data):
+
+        if self.context['request'].method != "PATCH" and (
+            Review.objects.filter(
+                author=self.context['request'].user,
+                title=self.context['title_id']
+            ).exists()
+        ):
+            raise serializers.ValidationError(
+                'Вы можете написать только один отзыв к этому произведению.')
+        return data
 
     class Meta:
         fields = ('id', 'text', 'author', 'score', 'pub_date',)
