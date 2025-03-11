@@ -159,4 +159,3 @@ USERS_ROLE = {
     'moderator': ROLE_CHOICES[1][0],
     'admin': ROLE_CHOICES[2][0]
 }
-
