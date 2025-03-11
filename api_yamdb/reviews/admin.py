@@ -8,7 +8,6 @@ admin.site.register(Review)
 admin.site.register(Comment)
 
 
-
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug')

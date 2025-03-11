@@ -74,6 +74,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (IsAuthenticatedOrReadOnly, CommentReviewPermission)
     pagination_class = BaseLimitOffsetPagination
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def review_obj(self):
         """Получает объект отзыва из url."""
