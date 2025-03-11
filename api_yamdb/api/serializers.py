@@ -1,6 +1,4 @@
-from django.db.models import Avg, Count
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 
 from reviews.models import (
     Comment, Title, Category, Genre, Review
@@ -99,6 +97,11 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username',
         default=serializers.CurrentUserDefault()
     )
+
+    def validate(self, data):
+        request = self.context['request']
+        if request.method == 'POST':
+            pass
 
     class Meta:
         fields = ('id', 'text', 'author', 'score', 'pub_date',)

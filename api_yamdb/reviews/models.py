@@ -131,7 +131,6 @@ class Review(AbstractTextAuthorPubdateModel):
         on_delete=models.CASCADE,
         verbose_name=_('Произведение'),
     )
-
     score = models.SmallIntegerField(
         _('Оценка'),
         validators=[
