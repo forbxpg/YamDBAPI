@@ -1,5 +1,6 @@
 """Кастомный user менеджер."""
 from django.contrib.auth.models import BaseUserManager
+
 from api_yamdb.settings import USERS_ROLE
 
 

@@ -4,14 +4,12 @@ import csv
 import logging
 from typing import Dict, List, Tuple
 
-from django.db.models import Model
 from django.core.exceptions import ObjectDoesNotExist
-
+from django.db.models import Model
 
 from .csv_config import BULK_CREATE_BATCH_SIZE
 from .exceptions import FileDoesNotExist, FileFormatError, TableFillError
 from .utils import Data, M2MData
-
 
 logger = logging.getLogger('import')
 

@@ -1,9 +1,9 @@
 """Настройки для импорта данных из CSV-файлов."""
 
-from reviews.models import Review, Title, Category, Genre, Comment
-from api_yamdb.settings import CSV_DATA_PATH
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
+from api_yamdb.settings import CSV_DATA_PATH
 
 BULK_CREATE_BATCH_SIZE = 300
 
