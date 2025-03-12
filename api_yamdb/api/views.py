@@ -14,12 +14,13 @@ from reviews.models import Category, Genre, Review, Title
 
 from .mixins import CreateListDestroyViewSet
 from .pagination import BaseLimitOffsetPagination
-from .permissions import CommentReviewPermission, UserPermission
+from .permissions import (CategoryAndGenrePermission, CommentReviewPermission,
+                          TitlePermission, UserPermission)
 from .serializers import (CategorySerializer, CommentSerializer,
-                          GenreSerializer, ObtainTokenSerializer,
+                          GenreSerializer, MeSerializer, ObtainTokenSerializer,
                           ReviewSerializer, SignUpSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
-                          UserSerializer, MeSerializer)
+                          UserSerializer)
 
 User = get_user_model()
 
@@ -35,12 +36,14 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.prefetch_related(
         'genre').select_related('category').annotate(
             average_rating=Avg('reviews__score'))
+    permission_classes = (TitlePermission,)
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = (
         'name', 'genre__slug',
         'category__slug', 'year',
     )
     pagination_class = BaseLimitOffsetPagination
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_serializer_class(self):
         if self.action in ('create', 'partial_update'):
@@ -57,6 +60,7 @@ class CategoryViewSet(CreateListDestroyViewSet):
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (CategoryAndGenrePermission,)
     lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
@@ -72,6 +76,7 @@ class GenreViewSet(CreateListDestroyViewSet):
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = (CategoryAndGenrePermission,)
     lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)

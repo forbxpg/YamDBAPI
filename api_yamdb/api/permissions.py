@@ -22,6 +22,39 @@ class CommentReviewPermission(BasePermission):
         )
 
 
+class TitlePermission(BasePermission):
+    """Ограничение для модели Title."""
+
+    def has_permission(self, request, view):
+        if request.method not in SAFE_METHODS:
+            return (request.user.is_authenticated and
+                    request.user.role_is == 'admin'
+                    or request.user.is_superuser)
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        if request.method not in SAFE_METHODS:
+            return (request.user.is_authenticated and
+                    request.user.role_is == 'admin'
+                    or request.user.is_superuser)
+        return True
+
+
+class CategoryAndGenrePermission(BasePermission):
+    """Ограничение для моделей Category и Genre."""
+
+    def has_permission(self, request, view):
+        if request.method not in SAFE_METHODS:
+            return (request.user.is_authenticated and
+                    request.user.role_is == 'admin' or
+                    request.user.is_superuser)
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        return (request.user.is_authenticated and
+                request.user.role_is == 'admin' or request.user.is_superuser)
+
+
 class UserPermission(BasePermission):
     """Ограничение для модели User. К запросам допускается только админ."""
 
