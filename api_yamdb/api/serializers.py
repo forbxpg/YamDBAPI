@@ -6,6 +6,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
+
 from .email_service import send_code_to_email
 from .validator import username_validator
 
@@ -187,3 +188,19 @@ class ObtainTokenSerializer(serializers.Serializer):
         refresh = RefreshToken.for_user(user)
         access_str = str(refresh.access_token)
         return access_str
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Users."""
+    username = serializers.CharField(
+        max_length=settings.SLUG_FIELD_MAX_LENGTH,
+        validators=[username_validator,]
+    )
+    email = serializers.EmailField(
+        max_length=settings.EMAIL_FIELD_MAX_LENGTH,
+    )
+
+    class Meta:
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role',)
+        model = User

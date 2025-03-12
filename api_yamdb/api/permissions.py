@@ -7,6 +7,7 @@ class CommentReviewPermission(BasePermission):
     К запросам POST допускаются авторизованные пользователи.
     К запросам PUT, PATCH, DELETE допускается только автор, модератор и админ.
     """
+
     def has_permission(self, request, view):
         if request.method == 'POST':
             return bool(request.user and request.user.is_authenticated)
@@ -19,3 +20,10 @@ class CommentReviewPermission(BasePermission):
             or (request.user.is_authenticated
                 and request.user.role_is != 'user')
         )
+
+
+class UserPermission(BasePermission):
+    """Ограничение для модели User. К запросам допускается только админ."""
+
+    def has_permission(self, request, view):
+        return request.user.role_is == 'admin' or request.user.is_superuser
