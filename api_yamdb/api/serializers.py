@@ -10,6 +10,8 @@ from users.models import User
 from .email_service import send_code_to_email
 from .validator import username_validator
 
+from rest_framework.validators import UniqueValidator
+
 
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор для модели Category."""
@@ -194,10 +196,12 @@ class UserSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Users."""
     username = serializers.CharField(
         max_length=settings.SLUG_FIELD_MAX_LENGTH,
-        validators=[username_validator,]
+        validators=[username_validator, UniqueValidator(
+            queryset=User.objects.all())]
     )
     email = serializers.EmailField(
         max_length=settings.EMAIL_FIELD_MAX_LENGTH,
+        validators=[UniqueValidator(queryset=User.objects.all())]
     )
 
     class Meta:

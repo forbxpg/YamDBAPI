@@ -160,6 +160,7 @@ class UsersViewSet(viewsets.ModelViewSet):
     pagination_class = BaseLimitOffsetPagination
     permission_classes = (UserPermission,)
     search_fields = ('username',)
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
 
 class APIMeView(APIView):
