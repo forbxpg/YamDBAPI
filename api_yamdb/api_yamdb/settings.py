@@ -105,6 +105,7 @@ STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 # Field length limitations
 CHARFIELD_MAX_LENGTH = 256
 SLUG_FIELD_MAX_LENGTH = 50
+EMAIL_FIELD_MAX_LENGTH = 50
 NAME_FIELD_TRUNCATOR = 10
 
 # Rating validation
@@ -170,3 +171,10 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(weeks=5)
 }
+
+# email service settings
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+
+EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
+
+DEFAULT_FROM_EMAIL = 'admin@yamdb.ru'

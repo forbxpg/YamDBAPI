@@ -1,17 +1,21 @@
 """API Views."""
+from http import HTTPStatus
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from reviews.models import Category, Genre, Review, Title
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from reviews.models import Category, Genre, Review, Title
 from .mixins import CreateListDestroyViewSet
 from .pagination import BaseLimitOffsetPagination
 from .permissions import CommentReviewPermission
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
-                          TitleReadSerializer, TitleWriteSerializer)
+                          TitleReadSerializer, TitleWriteSerializer,
+                          SignUpSerializer, ObtainTokenSerializer)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -116,3 +120,26 @@ class ReviewViewSet(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context['title_id'] = self.kwargs['title_id']
         return context
+
+
+class APISignUpView(APIView):
+    """Передать email и username, отправить код подтверждения."""
+
+    def post(self, request):
+        serializer = SignUpSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+        return Response(serializer.data, status=HTTPStatus.OK)
+
+
+class TokenObtainView(APIView):
+    """
+    Получение JWT-токена в обмен на username и confirmation code.
+    Права доступа: Доступно без токена.
+    """
+
+    def post(self, request):
+        serializer = ObtainTokenSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            token = serializer.save()
+        return Response({'Your token': token}, status=HTTPStatus.OK)
