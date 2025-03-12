@@ -3,14 +3,13 @@ from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
 from .email_service import send_code_to_email
 from .validator import username_validator
-
-from rest_framework.validators import UniqueValidator
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -208,3 +207,10 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role',)
         model = User
+
+
+class MeSerializer(UserSerializer):
+    role = serializers.CharField(
+        max_length=settings.SLUG_FIELD_MAX_LENGTH,
+        read_only=True
+    )

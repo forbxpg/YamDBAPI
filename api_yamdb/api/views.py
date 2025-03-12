@@ -19,7 +19,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ObtainTokenSerializer,
                           ReviewSerializer, SignUpSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
-                          UserSerializer)
+                          UserSerializer, MeSerializer)
 
 User = get_user_model()
 
@@ -159,6 +159,7 @@ class UsersViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     pagination_class = BaseLimitOffsetPagination
     permission_classes = (UserPermission,)
+    filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     http_method_names = ('get', 'post', 'patch', 'delete')
 
@@ -179,8 +180,8 @@ class APIMeView(APIView):
             ]
         }
         user = get_object_or_404(User, username=request.user.username)
-        serializer = UserSerializer(user, data=request.data, partial=True)
+        serializer = MeSerializer(user, data=request.data, partial=True)
         if serializer.is_valid(raise_exception=True) and request.data:
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(example_value, status=status.HTTP_400_BAD_REQUEST)

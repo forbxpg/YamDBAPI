@@ -26,4 +26,5 @@ class UserPermission(BasePermission):
     """Ограничение для модели User. К запросам допускается только админ."""
 
     def has_permission(self, request, view):
-        return request.user.role_is == 'admin' or request.user.is_superuser
+        return (request.user.is_authenticated and
+                request.user.role_is == 'admin' or request.user.is_superuser)
