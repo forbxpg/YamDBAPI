@@ -3,9 +3,11 @@ from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
+
 from .email_service import send_code_to_email
 from .validator import username_validator
 
@@ -187,3 +189,28 @@ class ObtainTokenSerializer(serializers.Serializer):
         refresh = RefreshToken.for_user(user)
         access_str = str(refresh.access_token)
         return access_str
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Users."""
+    username = serializers.CharField(
+        max_length=settings.SLUG_FIELD_MAX_LENGTH,
+        validators=[username_validator, UniqueValidator(
+            queryset=User.objects.all())]
+    )
+    email = serializers.EmailField(
+        max_length=settings.EMAIL_FIELD_MAX_LENGTH,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+
+    class Meta:
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role',)
+        model = User
+
+
+class MeSerializer(UserSerializer):
+    role = serializers.CharField(
+        max_length=settings.SLUG_FIELD_MAX_LENGTH,
+        read_only=True
+    )
