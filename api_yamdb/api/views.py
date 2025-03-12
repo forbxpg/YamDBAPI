@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from reviews.models import Category, Genre, Review, Title
 
+from .filters import TitleFilter
 from .mixins import CreateListDestroyViewSet
 from .pagination import BaseLimitOffsetPagination
 from .permissions import (CategoryAndGenrePermission, CommentReviewPermission,
@@ -38,10 +39,7 @@ class TitleViewSet(viewsets.ModelViewSet):
             average_rating=Avg('reviews__score'))
     permission_classes = (TitlePermission,)
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = (
-        'name', 'genre__slug',
-        'category__slug', 'year',
-    )
+    filterset_class = TitleFilter
     pagination_class = BaseLimitOffsetPagination
     http_method_names = ('get', 'post', 'patch', 'delete')
 
