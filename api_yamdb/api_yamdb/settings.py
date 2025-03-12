@@ -1,12 +1,10 @@
 """Настройки проекта."""
-from datetime import datetime as dt
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'p&l%385148kslhtyn^##a1)ilz@4zqj=rq&agdol^##zgl9(vs'
-
 
 DEBUG = True
 
@@ -95,18 +93,17 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
-
-# Constants
 # Field length limitations
 CHARFIELD_MAX_LENGTH = 256
 SLUG_FIELD_MAX_LENGTH = 50
-EMAIL_FIELD_MAX_LENGTH = 50
+EMAIL_FIELD_MAX_LENGTH = 254
 NAME_FIELD_TRUNCATOR = 10
+USERNAME_FIELD_LENGTH = 150
+ROLE_FIELD_LENGTH = 15
 
 # Rating validation
 MIN_RATING = 0
@@ -114,14 +111,47 @@ MAX_RATING = 10
 
 # Year validation
 MIN_YEAR = 0
-MAX_YEAR = dt.now().year
+MAX_YEAR = datetime.now().year
 
-# CSV data settings
+# CSV data path settings
 CSV_DATA_PATH = STATICFILES_DIRS[0] / 'data/'
 
 # Pagination
 DEFAULT_PAGE_SIZE = 10
 MAX_PAGE_SIZE = 20
+
+# User settings
+DEFAULT_USER_ROLE = 'user'
+MODERATOR_ROLE = 'moderator'
+ADMIN_ROLE = 'admin'
+
+ROLE_CHOICES = (
+    (DEFAULT_USER_ROLE, 'Пользователь'),
+    (MODERATOR_ROLE, 'Модератор'),
+    (ADMIN_ROLE, 'Администратор'),
+)
+USERS_ROLE = {
+    'user': DEFAULT_USER_ROLE,
+    'moderator': MODERATOR_ROLE,
+    'admin': ADMIN_ROLE,
+}
+
+# REST Framework base settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+# JWT settings
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(weeks=5)
+}
+
+# Email service settings
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
+DEFAULT_FROM_EMAIL = 'admin@yamdb.ru'
 
 # Command logs
 LOGGING = {
@@ -149,32 +179,3 @@ LOGGING = {
     },
 }
 
-# users roles
-ROLE_CHOICES = (
-    ('user', 'user'),
-    ('moderator', 'moderator'),
-    ('admin', 'admin'),
-)
-
-USERS_ROLE = {
-    'user': ROLE_CHOICES[0][0],
-    'moderator': ROLE_CHOICES[1][0],
-    'admin': ROLE_CHOICES[2][0]
-}
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
-}
-
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(weeks=5)
-}
-
-# email service settings
-EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-
-EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
-
-DEFAULT_FROM_EMAIL = 'admin@yamdb.ru'
