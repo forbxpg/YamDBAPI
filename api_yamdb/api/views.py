@@ -1,6 +1,5 @@
 """API Views."""
 from http import HTTPStatus
-
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -10,10 +9,11 @@ from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from reviews.models import Category, Genre, Review, Title
 
 from .filters import TitleFilter
-from .mixins import CreateListDestroyViewSet
+from .viewsets import CreateListDestroyViewSet
 from .pagination import BaseLimitOffsetPagination
 from .permissions import (CategoryAndGenrePermission, CommentReviewPermission,
                           TitlePermission, UserPermission)
@@ -22,6 +22,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           ReviewSerializer, SignUpSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
                           UserSerializer)
+
 
 User = get_user_model()
 

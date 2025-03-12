@@ -73,7 +73,6 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         Genre,
-        related_name='titles',
         verbose_name=_('Жанр'),
     )
     category = models.ForeignKey(
@@ -81,12 +80,12 @@ class Title(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=False,
-        related_name='titles',
         verbose_name=_('Категория'),
         db_index=True,
     )
 
     class Meta:
+        default_related_name = 'titles'
         verbose_name = _('Произведение')
         verbose_name_plural = _('Произведения')
 
@@ -132,9 +131,9 @@ class Review(AbstractTextAuthorPubdateModel):
         _('Оценка'),
         validators=[
             MinValueValidator(
-                settings.MIN_RATING, message='Оценка должна быть от 1 до 10'),
+                settings.MIN_RATING, message=_('Оценка должна быть от 1 до 10')),
             MaxValueValidator(
-                settings.MAX_RATING, message='Оценка должна быть от 1 до 10'),
+                settings.MAX_RATING, message=_('Оценка должна быть от 1 до 10')),
         ]
     )
 
@@ -162,7 +161,8 @@ class Comment(AbstractTextAuthorPubdateModel):
 
     review = models.ForeignKey(
         Review,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        verbose_name=_('Отзыв'),
     )
 
     class Meta(AbstractTextAuthorPubdateModel.Meta):
