@@ -1,3 +1,4 @@
+"""Модуль для классов разрешений API."""
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 

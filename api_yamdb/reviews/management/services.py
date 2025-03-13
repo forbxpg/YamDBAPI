@@ -1,8 +1,7 @@
 """Логика обработки данных из csv-файлов и заполнения таблиц."""
-
 import csv
 import logging
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Model
