@@ -18,8 +18,10 @@ class CommentReviewPermission(BasePermission):
         return (
             request.method in SAFE_METHODS
             or obj.author == request.user
-            or (request.user.is_authenticated
-                and request.user.role_is != 'user')
+            or (
+                request.user.is_authenticated
+                and request.user.role_is != 'user'
+            )
         )
 
 
@@ -28,16 +30,20 @@ class TitlePermission(BasePermission):
 
     def has_permission(self, request, view):
         if request.method not in SAFE_METHODS:
-            return (request.user.is_authenticated and
-                    request.user.role_is == 'admin'
-                    or request.user.is_superuser)
+            return (
+                request.user.is_authenticated
+                and request.user.role_is == 'admin'
+                or request.user.is_superuser
+            )
         return True
 
     def has_object_permission(self, request, view, obj):
         if request.method not in SAFE_METHODS:
-            return (request.user.is_authenticated and
-                    request.user.role_is == 'admin'
-                    or request.user.is_superuser)
+            return (
+                request.user.is_authenticated and
+                request.user.role_is == 'admin'
+                or request.user.is_superuser
+            )
         return True
 
 
@@ -46,19 +52,27 @@ class CategoryAndGenrePermission(BasePermission):
 
     def has_permission(self, request, view):
         if request.method not in SAFE_METHODS:
-            return (request.user.is_authenticated and
-                    request.user.role_is == 'admin' or
-                    request.user.is_superuser)
+            return (
+                request.user.is_authenticated
+                and request.user.role_is == 'admin'
+                or request.user.is_superuser
+            )
         return True
 
     def has_object_permission(self, request, view, obj):
-        return (request.user.is_authenticated and
-                request.user.role_is == 'admin' or request.user.is_superuser)
+        return (
+            request.user.is_authenticated
+            and request.user.role_is == 'admin'
+            or request.user.is_superuser
+        )
 
 
 class UserPermission(BasePermission):
     """Ограничение для модели User. К запросам допускается только админ."""
 
     def has_permission(self, request, view):
-        return (request.user.is_authenticated and
-                request.user.role_is == 'admin' or request.user.is_superuser)
+        return (
+            request.user.is_authenticated
+            and request.user.role_is == 'admin'
+            or request.user.is_superuser
+        )

@@ -1,6 +1,8 @@
 """Модели приложения reviews."""
 from django.conf import settings
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import (
+    MaxValueValidator, MinValueValidator
+)
 from django.db import models
 from django.utils.text import Truncator, slugify
 from django.utils.translation import gettext_lazy as _
@@ -33,7 +35,9 @@ class AbstractNameSlugBaseModel(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)[:settings.SLUG_FIELD_MAX_LENGTH]
+            self.slug = slugify(
+                self.name
+            )[:settings.SLUG_FIELD_MAX_LENGTH]
         super().save(*args, **kwargs)
 
 
@@ -97,7 +101,8 @@ class AbstractTextAuthorPubdateModel(models.Model):
     """
     Класс, определяющий абстрактную модель.
 
-    Используется для создания моделей, имеющих поля text, author и pub_date.
+    Используется для создания моделей, 
+    имеющих поля text, author и pub_date.
     """
     text = models.TextField(
         _('Текст'),
@@ -131,9 +136,13 @@ class Review(AbstractTextAuthorPubdateModel):
         _('Оценка'),
         validators=[
             MinValueValidator(
-                settings.MIN_RATING, message=_('Оценка должна быть от 1 до 10')),
+                settings.MIN_RATING,
+                message=_('Оценка должна быть от 1 до 10')
+            ),
             MaxValueValidator(
-                settings.MAX_RATING, message=_('Оценка должна быть от 1 до 10')),
+                settings.MAX_RATING,
+                message=_('Оценка должна быть от 1 до 10')
+            ),
         ]
     )
 
