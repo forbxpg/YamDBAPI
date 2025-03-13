@@ -1,5 +1,6 @@
 """API Views."""
 from http import HTTPStatus
+
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -9,11 +10,9 @@ from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from reviews.models import Category, Genre, Review, Title
 
-from .filters import TitleFilter
-from .viewsets import CreateListDestroyViewSet
+from .mixins import CreateListDestroyViewSet
 from .pagination import BaseLimitOffsetPagination
 from .permissions import (CategoryAndGenrePermission, CommentReviewPermission,
                           TitlePermission, UserPermission)
@@ -22,7 +21,6 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           ReviewSerializer, SignUpSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
                           UserSerializer)
-
 
 User = get_user_model()
 
@@ -40,7 +38,10 @@ class TitleViewSet(viewsets.ModelViewSet):
             average_rating=Avg('reviews__score'))
     permission_classes = (TitlePermission,)
     filter_backends = (DjangoFilterBackend,)
-    filterset_class = TitleFilter
+    filterset_fields = (
+        'name', 'genre__slug',
+        'category__slug', 'year',
+    )
     pagination_class = BaseLimitOffsetPagination
     http_method_names = ('get', 'post', 'patch', 'delete')
 

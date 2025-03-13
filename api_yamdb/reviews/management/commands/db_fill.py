@@ -10,7 +10,6 @@ from ..csv_config import CSV_MAPPING, M2M_MODELS_MAPPING
 from ..services import (fill_many_to_many_tables,
                         fill_simple_and_foreign_key_tables)
 
-
 logger = logging.getLogger('import')
 
 
@@ -81,9 +80,9 @@ class Command(BaseCommand):
                     self.fill_selected_tables(
                         options, CSV_MAPPING, M2M_MODELS_MAPPING,
                     )
+            self.stdout.write(self.style.SUCCESS('Данные успешно заполнены!'))
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'Ошибка при заполнении: {e}'))
-        self.stdout.write(self.style.SUCCESS('Данные успешно заполнены!'))
 
     def fill_all_tables(
         self,
