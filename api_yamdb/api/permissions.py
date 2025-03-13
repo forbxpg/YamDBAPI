@@ -40,8 +40,8 @@ class TitlePermission(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method not in SAFE_METHODS:
             return (
-                request.user.is_authenticated and
-                request.user.role_is == 'admin'
+                request.user.is_authenticated
+                and request.user.role_is == 'admin'
                 or request.user.is_superuser
             )
         return True

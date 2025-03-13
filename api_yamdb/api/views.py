@@ -15,13 +15,17 @@ from reviews.models import Category, Genre, Review, Title
 from .filters import TitleFilter
 from .viewsets import CreateListDestroyViewSet
 from .pagination import BaseLimitOffsetPagination
-from .permissions import (CategoryAndGenrePermission, CommentReviewPermission,
-                          TitlePermission, UserPermission)
-from .serializers import (CategorySerializer, CommentSerializer,
-                          GenreSerializer, MeSerializer, ObtainTokenSerializer,
-                          ReviewSerializer, SignUpSerializer,
-                          TitleReadSerializer, TitleWriteSerializer,
-                          UserSerializer)
+from .permissions import (
+    CategoryAndGenrePermission, CommentReviewPermission,
+    TitlePermission, UserPermission
+)
+from .serializers import (
+    CategorySerializer, CommentSerializer,
+    GenreSerializer, MeSerializer, ObtainTokenSerializer,
+    ReviewSerializer, SignUpSerializer,
+    TitleReadSerializer, TitleWriteSerializer,
+    UserSerializer
+)
 
 
 User = get_user_model()

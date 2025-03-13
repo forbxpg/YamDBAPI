@@ -35,9 +35,7 @@ class AbstractNameSlugBaseModel(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(
-                self.name
-            )[:settings.SLUG_FIELD_MAX_LENGTH]
+            self.slug = slugify(self.name)[:settings.SLUG_FIELD_MAX_LENGTH]
         super().save(*args, **kwargs)
 
 
@@ -101,7 +99,7 @@ class AbstractTextAuthorPubdateModel(models.Model):
     """
     Класс, определяющий абстрактную модель.
 
-    Используется для создания моделей, 
+    Используется для создания моделей,
     имеющих поля text, author и pub_date.
     """
     text = models.TextField(
