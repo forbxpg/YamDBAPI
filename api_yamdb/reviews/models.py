@@ -30,9 +30,6 @@ class AbstractNameSlugBaseModel(models.Model):
     class Meta:
         abstract = True
 
-    def __str__(self):
-        return self.name
-
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)[:settings.SLUG_FIELD_MAX_LENGTH]
@@ -46,6 +43,9 @@ class Category(AbstractNameSlugBaseModel):
         verbose_name = _('Категория')
         verbose_name_plural = _('Категории')
 
+    def __str__(self):
+        return f'Название категории: {self.name}'
+
 
 class Genre(AbstractNameSlugBaseModel):
     """Модель жанра."""
@@ -53,6 +53,9 @@ class Genre(AbstractNameSlugBaseModel):
     class Meta(AbstractNameSlugBaseModel.Meta):
         verbose_name = _('Жанр')
         verbose_name_plural = _('Жанры')
+
+    def __str__(self):
+        return f'Название жанра: {self.name}'
 
 
 class Title(models.Model):
@@ -62,12 +65,14 @@ class Title(models.Model):
         _('Название'),
         max_length=settings.CHARFIELD_MAX_LENGTH,
     )
-    year = models.IntegerField(
+    year = models.SmallIntegerField(
         _('Год выпуска'),
         validators=[
-            MinValueValidator(settings.MIN_YEAR),
-            MaxValueValidator(settings.MAX_YEAR),
-        ]
+            MaxValueValidator(
+                settings.MAX_YEAR,
+                message=_('Год не может быть больше текущего')
+            ),
+        ],
     )
     description = models.TextField(
         _('Описание'),
@@ -81,7 +86,6 @@ class Title(models.Model):
         Category,
         on_delete=models.SET_NULL,
         null=True,
-        blank=False,
         verbose_name=_('Категория'),
         db_index=True,
     )
@@ -92,7 +96,7 @@ class Title(models.Model):
         verbose_name_plural = _('Произведения')
 
     def __str__(self):
-        return self.name
+        return f'Название произведения: {self.name}'
 
 
 class AbstractTextAuthorPubdateModel(models.Model):

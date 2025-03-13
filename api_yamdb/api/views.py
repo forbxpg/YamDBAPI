@@ -5,8 +5,9 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
-from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import (
+    IsAuthenticated, IsAuthenticatedOrReadOnly
+)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -41,7 +42,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     queryset = Title.objects.prefetch_related(
         'genre').select_related('category').annotate(
-            average_rating=Avg('reviews__score'))
+        rating=Avg('reviews__score'))
     permission_classes = (TitlePermission,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter

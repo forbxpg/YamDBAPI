@@ -1,4 +1,6 @@
 """Сериализаторы API."""
+from unicodedata import category
+
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
@@ -37,7 +39,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
     Преобразует данные для чтения или удаления объектов модели.
     """
 
-    rating = serializers.SerializerMethodField(read_only=True)
+    rating = serializers.IntegerField(read_only=True, default=None)
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
 
@@ -53,10 +55,6 @@ class TitleReadSerializer(serializers.ModelSerializer):
         )
         model = Title
 
-    def get_rating(self, obj):
-        """Возвращает рейтинг произведения."""
-        return obj.average_rating
-
 
 class TitleWriteSerializer(serializers.ModelSerializer):
     """
@@ -66,12 +64,12 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     """
 
     genre = serializers.SlugRelatedField(
-        queryset=Genre.objects.only('slug'),
+        queryset=Genre.objects.all(),
         slug_field='slug',
         many=True,
     )
     category = serializers.SlugRelatedField(
-        queryset=Category.objects.only('slug'),
+        queryset=Category.objects.all(),
         slug_field='slug',
     )
 
@@ -85,6 +83,9 @@ class TitleWriteSerializer(serializers.ModelSerializer):
             'category',
         )
         model = Title
+
+    def to_representation(self, instance):
+        return TitleReadSerializer(instance).data
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -108,7 +109,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     def validate(self, data):
-        if self.context['request'].method != "PATCH" and (
+        if self.context['request'].method != 'PATCH' and (
                 Review.objects.filter(
                     author=self.context['request'].user,
                     title=self.context['title_id'],
