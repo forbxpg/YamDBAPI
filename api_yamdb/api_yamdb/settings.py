@@ -125,11 +125,6 @@ DEFAULT_USER_ROLE = 'user'
 MODERATOR_ROLE = 'moderator'
 ADMIN_ROLE = 'admin'
 
-ROLE_CHOICES = (
-    (DEFAULT_USER_ROLE, 'Пользователь'),
-    (MODERATOR_ROLE, 'Модератор'),
-    (ADMIN_ROLE, 'Администратор'),
-)
 USERS_ROLE = {
     'user': DEFAULT_USER_ROLE,
     'moderator': MODERATOR_ROLE,

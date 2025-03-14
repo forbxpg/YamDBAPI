@@ -28,6 +28,5 @@ auth_urls = [
 
 urlpatterns = [
     path('v1/auth/', include(auth_urls)),
-    path('v1/users/me/', views.APIMeView.as_view(), name='me'),
     path('v1/', include(router_v1.urls)),
 ]
