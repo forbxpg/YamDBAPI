@@ -1,14 +1,9 @@
-import re
-
 from django.core.exceptions import ValidationError
 
 
-def username_validator(username):
-    if username.lower() == 'me':
+def validator_forbidden_name(username):
+    """Сверяет имя пользователя со списком запрещенных имен."""
+    forrbidden_names = ('me',)
+    if username.lower() in forrbidden_names:
         raise ValidationError(
-            'Имя пользователя "me" запрещено')
-    elif re.match(r'^[\w.@+-]+\Z', username) is None:
-        raise ValidationError(
-            'Имя пользователя содержит недопустимые символы.'
-        )
-    return username
+            f'Имя пользователя {username} запрещено')

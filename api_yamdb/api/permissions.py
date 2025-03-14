@@ -1,18 +1,13 @@
 """Модуль для классов разрешений API."""
+from django.conf import settings
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
-class CommentReviewPermission(BasePermission):
-    """Ограничение для модели Comment.
+class IsAdminModerAuthorOrReadOnly(BasePermission):
+    """Ограничение доступа для определенных ролей пользователей.
 
-    К запросам POST допускаются авторизованные пользователи.
     К запросам PUT, PATCH, DELETE допускается только автор, модератор и админ.
     """
-
-    def has_permission(self, request, view):
-        if request.method == 'POST':
-            return bool(request.user and request.user.is_authenticated)
-        return True
 
     def has_object_permission(self, request, view, obj):
         return (
@@ -20,7 +15,8 @@ class CommentReviewPermission(BasePermission):
             or obj.author == request.user
             or (
                 request.user.is_authenticated
-                and request.user.role_is != 'user'
+                and (request.user.role_is == settings.MODERATOR_ROLE
+                     or request.user.role_is == settings.ADMIN_ROLE)
             )
         )
 

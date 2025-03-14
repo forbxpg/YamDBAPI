@@ -1,6 +1,5 @@
 """Фильтры."""
 from django_filters import rest_framework as api_filter
-
 from reviews.models import Title
 
 
