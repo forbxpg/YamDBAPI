@@ -10,7 +10,6 @@ from ..csv_config import CSV_MAPPING, M2M_MODELS_MAPPING
 from ..services import (fill_many_to_many_tables,
                         fill_simple_and_foreign_key_tables)
 
-
 logger = logging.getLogger('import')
 
 

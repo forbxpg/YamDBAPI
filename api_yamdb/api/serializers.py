@@ -1,19 +1,14 @@
 """Сериализаторы API."""
-from unicodedata import category
-
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
-from django.db import IntegrityError
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from rest_framework_simplejwt.tokens import RefreshToken
-
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
-from .email_service import send_code_to_email
-from .validators import username_validator
+from .validators import validator_forbidden_name
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -97,7 +92,6 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date')
-        read_only_fields = ('title', 'review', 'pub_date')
         model = Comment
 
 
@@ -109,10 +103,11 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     def validate(self, data):
-        if self.context['request'].method != 'PATCH' and (
+        request = self.context['request']
+        if request.method != 'PATCH' and (
                 Review.objects.filter(
-                    author=self.context['request'].user,
-                    title=self.context['title_id'],
+                    author=request.user,
+                    title=request.parser_context['kwargs']['title_id'],
                 ).exists()
         ):
             raise serializers.ValidationError(
@@ -121,51 +116,42 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('id', 'text', 'author', 'score', 'pub_date',)
-        read_only_fields = ('title', 'pub_date')
+        read_only_fields = ('title',)
         model = Review
 
 
 class SignUpSerializer(serializers.Serializer):
     username = serializers.CharField(
-        max_length=settings.SLUG_FIELD_MAX_LENGTH,
-        validators=[username_validator],
+        max_length=settings.USERNAME_FIELD_LENGTH,
+        validators=[UnicodeUsernameValidator(), validator_forbidden_name]
     )
     email = serializers.EmailField(
         max_length=settings.EMAIL_FIELD_MAX_LENGTH,
     )
 
     def validate(self, data):
-        try:
-            User.objects.get_or_create(
-                username=data['username'],
-                email=data['email'],
-            )
-        except IntegrityError:
-            raise serializers.ValidationError(
-                'Пользователь с таким именем или почтой уже существует'
-            )
-
+        user_by_name = User.objects.filter(username=data['username']).first()
+        user_by_email = User.objects.filter(email=data['email']).first()
+        if user_by_name != user_by_email:
+            error_msg = {}
+            if user_by_name is not None:
+                error_msg['username'] = (
+                    'Пользователь с таким именем уже существует'
+                )
+            if user_by_email is not None:
+                error_msg['email'] = (
+                    'Пользователь с такой почтой уже существует'
+                )
+            raise serializers.ValidationError(detail=error_msg)
         return data
-
-    def create(self, validated_data):
-        username = validated_data['username']
-        email = validated_data['email']
-
-        user, _ = User.objects.get_or_create(
-            username=username,
-            email=email,
-        )
-        user.save()
-        send_code_to_email(user)
-        return user
 
 
 class ObtainTokenSerializer(serializers.Serializer):
     """Сериализатор для получения JWT-токена."""
 
     username = serializers.CharField(
-        max_length=settings.SLUG_FIELD_MAX_LENGTH,
-        required=True,
+        max_length=settings.USERNAME_FIELD_LENGTH,
+        validators=[UnicodeUsernameValidator(), validator_forbidden_name]
     )
     confirmation_code = serializers.CharField(
         max_length=settings.SLUG_FIELD_MAX_LENGTH,
@@ -182,14 +168,7 @@ class ObtainTokenSerializer(serializers.Serializer):
                 'Неверный код подтверждения или '
                 'имя пользователя.'
             )
-        data['user'] = user
         return data
-
-    def create(self, validated_data):
-        user = validated_data['user']
-        refresh = RefreshToken.for_user(user)
-        access_str = str(refresh.access_token)
-        return access_str
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -198,9 +177,11 @@ class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         max_length=settings.SLUG_FIELD_MAX_LENGTH,
         validators=[
-            username_validator, UniqueValidator(
+            validator_forbidden_name,
+            UniqueValidator(
                 queryset=User.objects.all(),
             ),
+            UnicodeUsernameValidator()
         ],
     )
     email = serializers.EmailField(

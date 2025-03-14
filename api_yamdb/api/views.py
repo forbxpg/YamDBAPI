@@ -1,33 +1,30 @@
 """API Views."""
 from http import HTTPStatus
+
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
-from rest_framework.permissions import (
-    IsAuthenticated, IsAuthenticatedOrReadOnly
-)
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Review, Title
 
+from .email_service import send_code_to_email
 from .filters import TitleFilter
-from .viewsets import CreateListDestroyViewSet
 from .pagination import BaseLimitOffsetPagination
-from .permissions import (
-    CategoryAndGenrePermission, CommentReviewPermission,
-    TitlePermission, UserPermission
-)
-from .serializers import (
-    CategorySerializer, CommentSerializer,
-    GenreSerializer, MeSerializer, ObtainTokenSerializer,
-    ReviewSerializer, SignUpSerializer,
-    TitleReadSerializer, TitleWriteSerializer,
-    UserSerializer
-)
-
+from .permissions import (CategoryAndGenrePermission,
+                          IsAdminModerAuthorOrReadOnly, TitlePermission,
+                          UserPermission)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, MeSerializer, ObtainTokenSerializer,
+                          ReviewSerializer, SignUpSerializer,
+                          TitleReadSerializer, TitleWriteSerializer,
+                          UserSerializer)
+from .viewsets import CreateListDestroyViewSet
 
 User = get_user_model()
 
@@ -91,14 +88,14 @@ class CommentViewSet(viewsets.ModelViewSet):
     """ViewSet для модели Comment."""
 
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, CommentReviewPermission)
+    permission_classes = (
+        IsAuthenticatedOrReadOnly, IsAdminModerAuthorOrReadOnly)
     pagination_class = BaseLimitOffsetPagination
     http_method_names = ('get', 'post', 'patch', 'delete')
 
     def review_obj(self):
         """Получает объект отзыва из url."""
-        review = get_object_or_404(Review, pk=self.kwargs['review_id'])
-        return review
+        return get_object_or_404(Review, pk=self.kwargs['review_id'])
 
     def perform_create(self, serializer):
         serializer.save(
@@ -115,7 +112,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     serializer_class = ReviewSerializer
     pagination_class = BaseLimitOffsetPagination
-    permission_classes = (IsAuthenticatedOrReadOnly, CommentReviewPermission)
+    permission_classes = (
+        IsAuthenticatedOrReadOnly, IsAdminModerAuthorOrReadOnly)
     http_method_names = ('get', 'post', 'patch', 'delete')
 
     def title_obj(self):
@@ -131,19 +129,15 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return self.title_obj().reviews.all()
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['title_id'] = self.kwargs['title_id']
-        return context
-
 
 class APISignUpView(APIView):
     """Передать email и username, отправить код подтверждения."""
 
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
+        serializer.is_valid(raise_exception=True)
+        user, _ = User.objects.get_or_create(**serializer.validated_data)
+        send_code_to_email(user)
         return Response(serializer.data, status=HTTPStatus.OK)
 
 
@@ -155,9 +149,12 @@ class TokenObtainView(APIView):
 
     def post(self, request):
         serializer = ObtainTokenSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            token = serializer.save()
-        return Response({'Your token': token}, status=HTTPStatus.OK)
+        serializer.is_valid(raise_exception=True)
+        user = get_object_or_404(
+            User, username=serializer.validated_data['username'])
+        refresh = RefreshToken.for_user(user)
+        access_str = str(refresh.access_token)
+        return Response({'token': access_str}, status=HTTPStatus.OK)
 
 
 class UsersViewSet(viewsets.ModelViewSet):
