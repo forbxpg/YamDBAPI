@@ -21,54 +21,16 @@ class IsAdminModerAuthorOrReadOnly(BasePermission):
         )
 
 
-class TitlePermission(BasePermission):
-    """Ограничение для модели Title."""
+class IsAdminOrReadOnly(BasePermission):
+    """Ограничение доступа. Для всех только SAFE_METHODS, кроме админа."""
 
     def has_permission(self, request, view):
-        if request.method not in SAFE_METHODS:
-            return (
-                request.user.is_authenticated
-                and request.user.role_is == 'admin'
-                or request.user.is_superuser
-            )
-        return True
-
-    def has_object_permission(self, request, view, obj):
-        if request.method not in SAFE_METHODS:
-            return (
-                request.user.is_authenticated
-                and request.user.role_is == 'admin'
-                or request.user.is_superuser
-            )
-        return True
+        return request.method in SAFE_METHODS or (request.user.is_authenticated
+                                                  and request.user.is_admin)
 
 
-class CategoryAndGenrePermission(BasePermission):
-    """Ограничение для моделей Category и Genre."""
+class IsAdminOnly(BasePermission):
+    """Ограничение доступа. К запросам допускается только админ."""
 
     def has_permission(self, request, view):
-        if request.method not in SAFE_METHODS:
-            return (
-                request.user.is_authenticated
-                and request.user.role_is == 'admin'
-                or request.user.is_superuser
-            )
-        return True
-
-    def has_object_permission(self, request, view, obj):
-        return (
-            request.user.is_authenticated
-            and request.user.role_is == 'admin'
-            or request.user.is_superuser
-        )
-
-
-class UserPermission(BasePermission):
-    """Ограничение для модели User. К запросам допускается только админ."""
-
-    def has_permission(self, request, view):
-        return (
-            request.user.is_authenticated
-            and request.user.role_is == 'admin'
-            or request.user.is_superuser
-        )
+        return request.user.is_authenticated and request.user.is_admin

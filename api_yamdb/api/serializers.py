@@ -4,7 +4,6 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
@@ -173,25 +172,6 @@ class ObtainTokenSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор для модели User."""
-
-    username = serializers.CharField(
-        max_length=settings.SLUG_FIELD_MAX_LENGTH,
-        validators=[
-            validator_forbidden_name,
-            UniqueValidator(
-                queryset=User.objects.all(),
-            ),
-            UnicodeUsernameValidator()
-        ],
-    )
-    email = serializers.EmailField(
-        max_length=settings.EMAIL_FIELD_MAX_LENGTH,
-        validators=[
-            UniqueValidator(
-                queryset=User.objects.all(),
-            )
-        ],
-    )
 
     class Meta:
         fields = ('username', 'email', 'first_name',

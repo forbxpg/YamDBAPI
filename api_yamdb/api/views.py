@@ -6,6 +6,7 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
@@ -16,9 +17,8 @@ from reviews.models import Category, Genre, Review, Title
 from .email_service import send_code_to_email
 from .filters import TitleFilter
 from .pagination import BaseLimitOffsetPagination
-from .permissions import (CategoryAndGenrePermission,
-                          IsAdminModerAuthorOrReadOnly, TitlePermission,
-                          UserPermission)
+from .permissions import (IsAdminModerAuthorOrReadOnly, IsAdminOnly,
+                          IsAdminOrReadOnly)
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, MeSerializer, ObtainTokenSerializer,
                           ReviewSerializer, SignUpSerializer,
@@ -40,7 +40,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.prefetch_related(
         'genre').select_related('category').annotate(
         rating=Avg('reviews__score'))
-    permission_classes = (TitlePermission,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
     pagination_class = BaseLimitOffsetPagination
@@ -61,7 +61,7 @@ class CategoryViewSet(CreateListDestroyViewSet):
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (CategoryAndGenrePermission,)
+    permission_classes = (IsAdminOrReadOnly,)
     lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
@@ -77,7 +77,7 @@ class GenreViewSet(CreateListDestroyViewSet):
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (CategoryAndGenrePermission,)
+    permission_classes = (IsAdminOrReadOnly,)
     lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
@@ -164,30 +164,27 @@ class UsersViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     lookup_field = 'username'
     pagination_class = BaseLimitOffsetPagination
-    permission_classes = (UserPermission,)
+    permission_classes = (IsAdminOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     http_method_names = ('get', 'post', 'patch', 'delete')
 
-
-class APIMeView(APIView):
-    """APIMeView."""
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        user = get_object_or_404(User, username=request.user.username)
-        serializer = UserSerializer(user)
-        return Response(serializer.data, status=HTTPStatus.OK)
-
-    def patch(self, request):
+    @action(detail=False, methods=['get', 'patch'],
+            permission_classes=[IsAuthenticated])
+    def me(self, request):
         example_value = {
             "field_name": [
                 "string"
             ]
         }
         user = get_object_or_404(User, username=request.user.username)
-        serializer = MeSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid(raise_exception=True) and request.data:
+        if request.method == 'PATCH':
+            serializer = MeSerializer(user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            if not request.data:
+                return Response(example_value,
+                                status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(example_value, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)

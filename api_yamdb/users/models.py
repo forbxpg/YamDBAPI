@@ -1,20 +1,21 @@
 """Модели приложения users."""
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from .managers import CustomUserManager
-from .validators import CustomUsernameValidator
 
 
 class User(AbstractUser):
     """Расширенная модель пользователя."""
-    username_validator = CustomUsernameValidator
+    username_validator = UnicodeUsernameValidator()
 
     username = models.CharField(
         max_length=settings.USERNAME_FIELD_LENGTH,
         unique=True,
+        validators=[username_validator],
         verbose_name=_('Имя пользователя')
     )
     email = models.EmailField(
@@ -29,11 +30,16 @@ class User(AbstractUser):
         verbose_name=_('Биография')
     )
 
+    class RoleChoices(models.TextChoices):
+        USER = settings.DEFAULT_USER_ROLE, _("Пользователь")
+        MODERATOR = settings.MODERATOR_ROLE, _("Модератор")
+        ADMIN = settings.ADMIN_ROLE, _("Администратор")
+
     role = models.CharField(
         max_length=settings.ROLE_FIELD_LENGTH,
-        choices=settings.ROLE_CHOICES,
+        choices=RoleChoices.choices,
         blank=True,
-        default=settings.USERS_ROLE['user'],
+        default=RoleChoices.USER,
         verbose_name=_('Роль пользователя')
     )
 
@@ -44,6 +50,10 @@ class User(AbstractUser):
         """Meta."""
         verbose_name = _('Пользователь')
         verbose_name_plural = _('Пользователи')
+        ordering = ('username',)
+
+    def __str__(self):
+        return f'username пользователя: {self.username}'
 
     @property
     def superuser_is(self):
@@ -52,3 +62,9 @@ class User(AbstractUser):
     @property
     def role_is(self):
         return self.role
+
+    @property
+    def is_admin(self):
+        if self.role == settings.ADMIN_ROLE or self.is_superuser:
+            return True
+        return False
