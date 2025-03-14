@@ -92,6 +92,7 @@ class Title(models.Model):
         default_related_name = 'titles'
         verbose_name = _('Произведение')
         verbose_name_plural = _('Произведения')
+        ordering = ('name',)
 
     def __str__(self):
         return f'Название произведения: {self.name}'

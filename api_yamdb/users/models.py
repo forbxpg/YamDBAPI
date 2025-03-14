@@ -26,7 +26,6 @@ class User(AbstractUser):
 
     bio = models.TextField(
         blank=True,
-        null=True,
         verbose_name=_('Биография')
     )
 
