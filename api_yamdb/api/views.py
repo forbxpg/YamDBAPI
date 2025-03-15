@@ -1,6 +1,7 @@
 """API Views."""
 from http import HTTPStatus
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -168,6 +169,14 @@ class UsersViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     http_method_names = ('get', 'post', 'patch', 'delete')
+
+    def perform_create(self, serializer):
+        role = serializer.validated_data.get('role', 'user')
+        if role in (settings.ADMIN_ROLE,):
+            return serializer.save(is_staff=True, role=role)
+        return serializer.save(is_staff=False, role=role)
+
+    perform_update = perform_create
 
     @action(detail=False, methods=['get', 'patch'],
             permission_classes=[IsAuthenticated])

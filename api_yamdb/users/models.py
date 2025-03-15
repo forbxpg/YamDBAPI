@@ -1,4 +1,5 @@
 """Модели приложения users."""
+from api.validators import validator_forbidden_name
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
@@ -10,16 +11,14 @@ from .managers import CustomUserManager
 
 class User(AbstractUser):
     """Расширенная модель пользователя."""
-    username_validator = UnicodeUsernameValidator()
 
     username = models.CharField(
         max_length=settings.USERNAME_FIELD_LENGTH,
         unique=True,
-        validators=[username_validator],
+        validators=[UnicodeUsernameValidator(), validator_forbidden_name],
         verbose_name=_('Имя пользователя')
     )
     email = models.EmailField(
-        max_length=settings.EMAIL_FIELD_MAX_LENGTH,
         unique=True,
         verbose_name=_('Адрес электронной почты')
     )
