@@ -1,5 +1,4 @@
 """Модуль для классов разрешений API."""
-from django.conf import settings
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
@@ -13,11 +12,8 @@ class IsAdminModerAuthorOrReadOnly(BasePermission):
         return (
             request.method in SAFE_METHODS
             or obj.author == request.user
-            or (
-                request.user.is_authenticated
-                and (request.user.role_is == settings.MODERATOR_ROLE
-                     or request.user.role_is == settings.ADMIN_ROLE)
-            )
+            or (request.user.is_authenticated
+                and request.user.is_moderator_and_is_admin)
         )
 
 

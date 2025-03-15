@@ -181,18 +181,10 @@ class UsersViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get', 'patch'],
             permission_classes=[IsAuthenticated])
     def me(self, request):
-        example_value = {
-            "field_name": [
-                "string"
-            ]
-        }
         user = get_object_or_404(User, username=request.user.username)
         if request.method == 'PATCH':
             serializer = MeSerializer(user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
-            if not request.data:
-                return Response(example_value,
-                                status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
         else:
             serializer = UserSerializer(user)

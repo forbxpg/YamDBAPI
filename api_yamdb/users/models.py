@@ -54,15 +54,9 @@ class User(AbstractUser):
         return f'username пользователя: {self.username}'
 
     @property
-    def superuser_is(self):
-        return self.is_superuser
-
-    @property
-    def role_is(self):
-        return self.role
-
-    @property
     def is_admin(self):
-        if self.role == settings.ADMIN_ROLE or self.is_superuser:
-            return True
-        return False
+        return self.role in (settings.ADMIN_ROLE,) or self.is_superuser
+
+    @property
+    def is_moderator_and_is_admin(self):
+        return self.role in (settings.MODERATOR_ROLE,) or self.is_admin

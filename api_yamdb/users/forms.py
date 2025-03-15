@@ -2,7 +2,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 
-from api_yamdb.settings import USERS_ROLE
+from api_yamdb import settings
 
 User = get_user_model()
 
@@ -22,7 +22,7 @@ class CustomUserCreationForm(UserCreationForm):
         """Переопределяем метод save для админ панели."""
         user = super().save(commit=False)
         user.set_password(self.cleaned_data['password1'])
-        if (user.role == USERS_ROLE['admin']):
+        if user.role in (settings.ADMIN_ROLE,):
             user.is_staff = True
         else:
             user.is_staff = False

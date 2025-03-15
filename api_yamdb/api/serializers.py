@@ -173,6 +173,16 @@ class ObtainTokenSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор для модели User."""
 
+    def validate(self, data):
+        example_value = {
+            'field_name': [
+                'Введите поле пользователя.'
+            ]
+        }
+        if not data:
+            raise serializers.ValidationError(example_value)
+        return data
+
     class Meta:
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role',)

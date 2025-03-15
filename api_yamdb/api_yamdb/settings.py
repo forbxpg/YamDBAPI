@@ -105,6 +105,9 @@ NAME_FIELD_TRUNCATOR = 10
 USERNAME_FIELD_LENGTH = 150
 ROLE_FIELD_LENGTH = 15
 
+# Forbidden values
+FORBIDDEN_USERNAMES = ('me',)
+
 # Rating validation
 MIN_RATING = 0
 MAX_RATING = 10
@@ -125,11 +128,6 @@ DEFAULT_USER_ROLE = 'user'
 MODERATOR_ROLE = 'moderator'
 ADMIN_ROLE = 'admin'
 
-USERS_ROLE = {
-    'user': DEFAULT_USER_ROLE,
-    'moderator': MODERATOR_ROLE,
-    'admin': ADMIN_ROLE,
-}
 
 # REST Framework base settings
 REST_FRAMEWORK = {
