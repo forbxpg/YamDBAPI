@@ -1,7 +1,7 @@
 """Кастомный user менеджер."""
 from django.contrib.auth.models import BaseUserManager
 
-from api_yamdb.settings import USERS_ROLE
+from api_yamdb import settings
 
 
 class CustomUserManager(BaseUserManager):
@@ -20,7 +20,7 @@ class CustomUserManager(BaseUserManager):
             **extra_fields
         )
         user.set_password(password)
-        if user.role == USERS_ROLE['admin']:
+        if user.role in (settings.ADMIN_ROLE,):
             user.is_staff = True
         user.save(using=self._db)
         return user
@@ -31,7 +31,7 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_active', True)
         extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('role', USERS_ROLE['admin'])
+        extra_fields.setdefault('role', settings.ADMIN_ROLE)
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')

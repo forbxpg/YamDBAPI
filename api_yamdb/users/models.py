@@ -1,10 +1,11 @@
 """Модели приложения users."""
-from api.v1.validators import validator_forbidden_name
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from api.v1.validators import validator_forbidden_name
 
 from .managers import CustomUserManager
 
@@ -57,15 +58,9 @@ class User(AbstractUser):
         return f'username пользователя: {self.username}'
 
     @property
-    def superuser_is(self):
-        return self.is_superuser
-
-    @property
-    def role_is(self):
-        return self.role
-
-    @property
     def is_admin(self):
-        if self.role == settings.ADMIN_ROLE or self.is_superuser:
-            return True
-        return False
+        return self.role in (settings.ADMIN_ROLE,) or self.is_superuser
+
+    @property
+    def is_moderator(self):
+        return self.role in (settings.MODERATOR_ROLE,)
