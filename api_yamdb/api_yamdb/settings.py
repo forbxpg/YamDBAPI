@@ -100,17 +100,16 @@ STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 # Field length limitations
 CHARFIELD_MAX_LENGTH = 256
 SLUG_FIELD_MAX_LENGTH = 50
-EMAIL_FIELD_MAX_LENGTH = 254
 NAME_FIELD_TRUNCATOR = 10
+EMAIL_FIELD_MAX_LENGTH = 254
 USERNAME_FIELD_LENGTH = 150
 ROLE_FIELD_LENGTH = 15
 
 # Rating validation
-MIN_RATING = 0
+MIN_RATING = 1
 MAX_RATING = 10
 
 # Year validation
-MIN_YEAR = 0
 MAX_YEAR = datetime.now().year
 
 # CSV data path settings
@@ -118,18 +117,12 @@ CSV_DATA_PATH = STATICFILES_DIRS[0] / 'data/'
 
 # Pagination
 DEFAULT_PAGE_SIZE = 10
-MAX_PAGE_SIZE = 20
 
 # User settings
 DEFAULT_USER_ROLE = 'user'
 MODERATOR_ROLE = 'moderator'
 ADMIN_ROLE = 'admin'
 
-ROLE_CHOICES = (
-    (DEFAULT_USER_ROLE, 'Пользователь'),
-    (MODERATOR_ROLE, 'Модератор'),
-    (ADMIN_ROLE, 'Администратор'),
-)
 USERS_ROLE = {
     'user': DEFAULT_USER_ROLE,
     'moderator': MODERATOR_ROLE,

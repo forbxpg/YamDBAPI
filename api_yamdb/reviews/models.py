@@ -1,11 +1,10 @@
 """Модели приложения reviews."""
 from django.conf import settings
-from django.core.validators import (
-    MaxValueValidator, MinValueValidator
-)
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.text import Truncator, slugify
 from django.utils.translation import gettext_lazy as _
+
 from users.models import User
 
 
@@ -28,10 +27,8 @@ class AbstractNameSlugBaseModel(models.Model):
     )
 
     class Meta:
+        ordering = ('name',)
         abstract = True
-
-    def __str__(self):
-        return self.name
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -46,6 +43,9 @@ class Category(AbstractNameSlugBaseModel):
         verbose_name = _('Категория')
         verbose_name_plural = _('Категории')
 
+    def __str__(self):
+        return f'Название категории: {self.name}'
+
 
 class Genre(AbstractNameSlugBaseModel):
     """Модель жанра."""
@@ -53,6 +53,9 @@ class Genre(AbstractNameSlugBaseModel):
     class Meta(AbstractNameSlugBaseModel.Meta):
         verbose_name = _('Жанр')
         verbose_name_plural = _('Жанры')
+
+    def __str__(self):
+        return f'Название жанра: {self.name}'
 
 
 class Title(models.Model):
@@ -62,12 +65,14 @@ class Title(models.Model):
         _('Название'),
         max_length=settings.CHARFIELD_MAX_LENGTH,
     )
-    year = models.IntegerField(
+    year = models.SmallIntegerField(
         _('Год выпуска'),
         validators=[
-            MinValueValidator(settings.MIN_YEAR),
-            MaxValueValidator(settings.MAX_YEAR),
-        ]
+            MaxValueValidator(
+                settings.MAX_YEAR,
+                message=_('Год не может быть больше текущего')
+            ),
+        ],
     )
     description = models.TextField(
         _('Описание'),
@@ -81,7 +86,6 @@ class Title(models.Model):
         Category,
         on_delete=models.SET_NULL,
         null=True,
-        blank=False,
         verbose_name=_('Категория'),
         db_index=True,
     )
@@ -90,9 +94,10 @@ class Title(models.Model):
         default_related_name = 'titles'
         verbose_name = _('Произведение')
         verbose_name_plural = _('Произведения')
+        ordering = ('name',)
 
     def __str__(self):
-        return self.name
+        return f'Название произведения: {self.name}'
 
 
 class AbstractTextAuthorPubdateModel(models.Model):
@@ -135,11 +140,17 @@ class Review(AbstractTextAuthorPubdateModel):
         validators=[
             MinValueValidator(
                 settings.MIN_RATING,
-                message=_('Оценка должна быть от 1 до 10')
+                message=_(
+                    f'Оценка должна быть от '
+                    f'{settings.MIN_RATING} до {settings.MAX_RATING}'
+                ),
             ),
             MaxValueValidator(
                 settings.MAX_RATING,
-                message=_('Оценка должна быть от 1 до 10')
+                message=_(
+                    f'Оценка должна быть от '
+                    f'{settings.MIN_RATING} до {settings.MAX_RATING}'
+                ),
             ),
         ]
     )

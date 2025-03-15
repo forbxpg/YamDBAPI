@@ -1,4 +1,5 @@
-"""Модуль для роутеров API."""
+"""API URLs."""
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from . import views
@@ -19,3 +20,13 @@ router_v1.register(
     views.CommentViewSet,
     basename='comments'
 )
+
+auth_urls = [
+    path('signup/', views.APISignUpView.as_view(), name='signup'),
+    path('token/', views.TokenObtainView.as_view(), name='token_obtain_pair'),
+]
+
+urlpatterns = [
+    path('auth/', include(auth_urls)),
+    path('', include(router_v1.urls)),
+]

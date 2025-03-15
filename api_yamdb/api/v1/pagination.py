@@ -7,4 +7,3 @@ class BaseLimitOffsetPagination(LimitOffsetPagination):
     """Базовый класс пагинации."""
 
     default_limit = settings.DEFAULT_PAGE_SIZE
-    max_limit = settings.MAX_PAGE_SIZE
