@@ -1,4 +1,6 @@
 """Сериализаторы API."""
+from unicodedata import category
+
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.validators import UnicodeUsernameValidator
@@ -80,6 +82,14 @@ class TitleWriteSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return TitleReadSerializer(instance).data
+
+    def create(self, validated_data):
+        genre = validated_data.get('genre', None)
+        if not genre:
+            raise serializers.ValidationError(
+                'Укажите хотя бы один жанр.'
+            )
+        return super().create(validated_data)
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -172,6 +182,8 @@ class ObtainTokenSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор для модели User."""
+
+    role = serializers.CharField(default='user')
 
     class Meta:
         fields = ('username', 'email', 'first_name',

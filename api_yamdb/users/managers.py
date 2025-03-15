@@ -20,7 +20,11 @@ class CustomUserManager(BaseUserManager):
             **extra_fields
         )
         user.set_password(password)
-        if user.role == USERS_ROLE['admin']:
+        if user.role in ('admin',):
+            user.is_staff = True
+            user.is_superuser = True
+
+        if user.role in ('moderator',):
             user.is_staff = True
         user.save(using=self._db)
         return user

@@ -169,6 +169,15 @@ class UsersViewSet(viewsets.ModelViewSet):
     search_fields = ('username',)
     http_method_names = ('get', 'post', 'patch', 'delete')
 
+    def perform_create(self, serializer):
+        role = serializer.validated_data.get('role', 'user')
+        if role in ('admin', 'moderator'):
+            serializer.save(is_staff=True)
+        serializer.save(is_staff=False, role=role)
+
+    def perform_update(self, serializer):
+        return super().perform_create(serializer)
+
     @action(detail=False, methods=['get', 'patch'],
             permission_classes=[IsAuthenticated])
     def me(self, request):

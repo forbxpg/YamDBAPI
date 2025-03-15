@@ -27,6 +27,7 @@ class AbstractNameSlugBaseModel(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ('name',)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -82,8 +83,7 @@ class Title(models.Model):
     )
     category = models.ForeignKey(
         Category,
-        on_delete=models.SET_NULL,
-        null=True,
+        on_delete=models.PROTECT,
         verbose_name=_('Категория'),
         db_index=True,
     )
