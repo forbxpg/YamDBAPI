@@ -7,6 +7,8 @@ from django.utils.translation import gettext_lazy as _
 
 from users.models import User
 
+from .validators import validate_year
+
 
 class AbstractNameSlugBaseModel(models.Model):
     """
@@ -68,10 +70,7 @@ class Title(models.Model):
     year = models.SmallIntegerField(
         _('Год выпуска'),
         validators=[
-            MaxValueValidator(
-                settings.MAX_YEAR,
-                message=_('Год не может быть больше текущего')
-            ),
+            validate_year,
         ],
     )
     description = models.TextField(
@@ -141,15 +140,15 @@ class Review(AbstractTextAuthorPubdateModel):
             MinValueValidator(
                 settings.MIN_RATING,
                 message=_(
-                    f'Оценка должна быть от '
-                    f'{settings.MIN_RATING} до {settings.MAX_RATING}'
+                    f'Оценка должна быть от {settings.MIN_RATING}'
+                    f' до {settings.MAX_RATING}'
                 ),
             ),
             MaxValueValidator(
                 settings.MAX_RATING,
                 message=_(
-                    f'Оценка должна быть от '
-                    f'{settings.MIN_RATING} до {settings.MAX_RATING}'
+                    f'Оценка должна быть от {settings.MIN_RATING}'
+                    f' до {settings.MAX_RATING}'
                 ),
             ),
         ]
