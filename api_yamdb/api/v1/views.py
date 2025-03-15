@@ -13,6 +13,7 @@ from rest_framework.permissions import (IsAuthenticated,
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from reviews.models import Category, Genre, Review, Title
 
 from .email_service import send_code_to_email
@@ -26,6 +27,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
                           UserSerializer)
 from .viewsets import CreateListDestroyViewSet
+
 
 User = get_user_model()
 

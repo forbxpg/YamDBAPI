@@ -4,6 +4,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.text import Truncator, slugify
 from django.utils.translation import gettext_lazy as _
+
 from users.models import User
 
 
@@ -26,6 +27,7 @@ class AbstractNameSlugBaseModel(models.Model):
     )
 
     class Meta:
+        ordering = ('name',)
         abstract = True
 
     def save(self, *args, **kwargs):
@@ -138,11 +140,17 @@ class Review(AbstractTextAuthorPubdateModel):
         validators=[
             MinValueValidator(
                 settings.MIN_RATING,
-                message=_('Оценка должна быть от 1 до 10')
+                message=_(
+                    f'Оценка должна быть от '
+                    f'{settings.MIN_RATING} до {settings.MAX_RATING}'
+                ),
             ),
             MaxValueValidator(
                 settings.MAX_RATING,
-                message=_('Оценка должна быть от 1 до 10')
+                message=_(
+                    f'Оценка должна быть от '
+                    f'{settings.MIN_RATING} до {settings.MAX_RATING}'
+                ),
             ),
         ]
     )

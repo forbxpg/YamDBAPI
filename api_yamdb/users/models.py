@@ -1,5 +1,5 @@
 """Модели приложения users."""
-from api.validators import validator_forbidden_name
+from api.v1.validators import validator_forbidden_name
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
@@ -15,7 +15,10 @@ class User(AbstractUser):
     username = models.CharField(
         max_length=settings.USERNAME_FIELD_LENGTH,
         unique=True,
-        validators=[UnicodeUsernameValidator(), validator_forbidden_name],
+        validators=[
+            UnicodeUsernameValidator(),
+            validator_forbidden_name
+        ],
         verbose_name=_('Имя пользователя')
     )
     email = models.EmailField(

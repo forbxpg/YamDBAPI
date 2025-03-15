@@ -10,6 +10,7 @@ admin.site.register(Comment)
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
+    """Testing slugify in admin panel."""
     list_display = ('name', 'slug')
     search_fields = ('name',)
     list_filter = ('name',)
