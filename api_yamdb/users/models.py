@@ -1,10 +1,11 @@
 """Модели приложения users."""
-from api.v1.validators import validator_forbidden_name
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from api.v1.validators import validator_forbidden_name
 
 from .managers import CustomUserManager
 

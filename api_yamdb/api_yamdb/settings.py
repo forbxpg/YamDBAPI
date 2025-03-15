@@ -1,5 +1,5 @@
 """Настройки проекта."""
-from datetime import datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -111,9 +111,6 @@ FORBIDDEN_USERNAMES = ('me',)
 # Rating validation
 MIN_RATING = 1
 MAX_RATING = 10
-
-# Year validation
-MAX_YEAR = datetime.now().year
 
 # CSV data path settings
 CSV_DATA_PATH = STATICFILES_DIRS[0] / 'data/'
