@@ -18,7 +18,7 @@ class User(AbstractUser):
         validators=[UnicodeUsernameValidator(), validator_forbidden_name],
         verbose_name=_('Имя пользователя')
     )
-    email = models.EmailField(        
+    email = models.EmailField(
         unique=True,
         verbose_name=_('Адрес электронной почты')
     )
