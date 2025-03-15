@@ -58,5 +58,5 @@ class User(AbstractUser):
         return self.role in (settings.ADMIN_ROLE,) or self.is_superuser
 
     @property
-    def is_moderator_and_is_admin(self):
-        return self.role in (settings.MODERATOR_ROLE,) or self.is_admin
+    def is_moderator(self):
+        return self.role in (settings.MODERATOR_ROLE,)
